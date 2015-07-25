@@ -10,4 +10,5 @@
     <string name="sign_out">Sign out</string>
     <string name="error_message_generic">An error has occurred.</string>
     <string name="title_error">Error</string>
+    <string name="error_credentials_missing">You must enter your email and password.</string>
 </resources>

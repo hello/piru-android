@@ -3,6 +3,7 @@ package is.hello.piru.ui.screens;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,14 +16,15 @@ import javax.inject.Inject;
 import is.hello.piru.R;
 import is.hello.piru.api.SessionPresenter;
 import is.hello.piru.ui.dialogs.ErrorDialogFragment;
+import is.hello.piru.ui.util.Input;
 
 public class SessionFragment extends BaseFragment {
     @Inject SessionPresenter presenter;
 
     private TextView title;
-    private EditText email;
-    private EditText password;
-    private Button action;
+    private EditText emailText;
+    private EditText passwordText;
+    private Button actionButton;
 
 
     //region Lifecycle
@@ -33,9 +35,11 @@ public class SessionFragment extends BaseFragment {
         View view = inflater.inflate(R.layout.fragment_session, container, false);
 
         this.title = (TextView) view.findViewById(R.id.fragment_session_title);
-        this.email = (EditText) view.findViewById(R.id.fragment_session_email);
-        this.password = (EditText) view.findViewById(R.id.fragment_session_password);
-        this.action = (Button) view.findViewById(R.id.fragment_session_action);
+        this.emailText = (EditText) view.findViewById(R.id.fragment_session_email);
+        this.passwordText = (EditText) view.findViewById(R.id.fragment_session_password);
+        this.actionButton = (Button) view.findViewById(R.id.fragment_session_action);
+
+        Input.setOnSubmitListener(passwordText, this::submitCredentials);
 
         TextView info = (TextView) view.findViewById(R.id.fragment_session_info);
         info.setText(presenter.getEndpoint().getUrl());
@@ -55,9 +59,9 @@ public class SessionFragment extends BaseFragment {
         super.onDestroyView();
 
         this.title = null;
-        this.email = null;
-        this.password = null;
-        this.action = null;
+        this.emailText = null;
+        this.passwordText = null;
+        this.actionButton = null;
     }
 
     //endregion
@@ -66,19 +70,19 @@ public class SessionFragment extends BaseFragment {
     //region Bindings
 
     public void bindHasSession(boolean hasSession) {
-        email.setEnabled(!hasSession);
-        password.setEnabled(!hasSession);
+        emailText.setEnabled(!hasSession);
+        passwordText.setEnabled(!hasSession);
 
         if (hasSession) {
             title.setText(R.string.signed_in);
-            action.setText(R.string.sign_out);
-            action.setOnClickListener(this::clearSession);
+            actionButton.setText(R.string.sign_out);
+            actionButton.setOnClickListener(this::clearSession);
         } else {
             title.setText(R.string.sign_in);
-            action.setText(R.string.sign_in);
-            action.setOnClickListener(this::submitCredentials);
+            actionButton.setText(R.string.sign_in);
+            actionButton.setOnClickListener(this::submitCredentials);
 
-            email.requestFocus();
+            emailText.requestFocus();
         }
     }
 
@@ -88,9 +92,22 @@ public class SessionFragment extends BaseFragment {
     //region Actions
 
     public void submitCredentials(@NonNull View sender) {
-        subscribe(presenter.authorize(email.getText().toString(), password.getText().toString()), session -> {
-            email.setText(null);
-            password.setText(null);
+        String email = emailText.getText().toString();
+        String password = passwordText.getText().toString();
+
+        if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
+            ErrorDialogFragment errorDialogFragment = new ErrorDialogFragment.Builder()
+                    .withMessage(R.string.error_credentials_missing)
+                    .build();
+            errorDialogFragment.show(getFragmentManager());
+            return;
+        }
+
+        Input.closeSoftKeyboard(passwordText);
+
+        subscribe(presenter.authorize(email, password), session -> {
+            emailText.setText(null);
+            passwordText.setText(null);
         }, error -> {
             ErrorDialogFragment errorDialogFragment = new ErrorDialogFragment.Builder()
                     .withError(error)
