@@ -1,0 +1,4 @@
+<resources>
+    <dimen name="gap_outer">16dp</dimen>
+    <dimen name="gap_inter">8dp</dimen>
+</resources>

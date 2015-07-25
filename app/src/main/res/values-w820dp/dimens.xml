@@ -1,0 +1,3 @@
+<resources>
+    <dimen name="gap_outer">64dp</dimen>
+</resources>
