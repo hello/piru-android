@@ -11,7 +11,7 @@ import is.hello.buruberi.bluetooth.Buruberi;
 import is.hello.buruberi.bluetooth.stacks.BluetoothStack;
 
 @Module(complete = false,
-        injects = {PeripheralPresenter.class})
+        injects = {SensePresenter.class, PillDfuPresenter.class})
 public class BluetoothModule {
     @Singleton @Provides BluetoothStack provideBluetoothStack(@NonNull Context context) {
         return new Buruberi()
