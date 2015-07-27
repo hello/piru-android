@@ -11,4 +11,7 @@
     <string name="error_message_generic">An error has occurred.</string>
     <string name="title_error">Error</string>
     <string name="error_credentials_missing">You must enter your email and password.</string>
+    <string name="action_next">Next</string>
+    <string name="error_wrong_device_selection">Please select one Sense, and one Sleep Pill.</string>
+    <string name="title_loading">Loading…</string>
 </resources>

@@ -1,4 +1,6 @@
 <resources>
     <dimen name="gap_outer">16dp</dimen>
     <dimen name="gap_inter">8dp</dimen>
+
+    <dimen name="elevation_card">2dp</dimen>
 </resources>

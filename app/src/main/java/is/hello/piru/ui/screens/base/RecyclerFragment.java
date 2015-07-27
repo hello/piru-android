@@ -3,6 +3,7 @@ package is.hello.piru.ui.screens.base;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +36,9 @@ public abstract class RecyclerFragment extends BaseFragment {
 
         this.recycler = (RecyclerView) view.findViewById(R.id.fragment_recycler_view);
         this.busyIndicator = (ProgressBar) view.findViewById(R.id.fragment_recycler_busy);
+
+        recycler.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recycler.setHasFixedSize(true);
 
         onConfigureRecycler(recycler);
 

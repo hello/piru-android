@@ -2,18 +2,12 @@ package is.hello.piru.api.model;
 
 import android.support.annotation.NonNull;
 
-import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-
-import org.joda.time.DateTime;
-import org.joda.time.Hours;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class Device {
-    public static final int MISSING_THRESHOLD_HRS = 24;
-
     @SerializedName("type")
     private Type type;
 
@@ -27,13 +21,10 @@ public class Device {
     private String firmwareVersion;
 
     @SerializedName("last_updated")
-    private DateTime lastUpdated;
+    private long lastUpdated;
 
     @SerializedName("color")
     private Color color;
-
-    @Expose(deserialize = false, serialize = false)
-    private boolean exists = true;
 
 
     //region Util
@@ -44,19 +35,6 @@ public class Device {
             map.put(device.getType(), device);
         }
         return map;
-    }
-
-    //endregion
-
-
-    //region Creation
-
-    public static Device createPlaceholder(@NonNull Type type) {
-        Device device = new Device();
-        device.type = type;
-        device.exists = false;
-        device.state = State.UNKNOWN;
-        return device;
     }
 
     //endregion
@@ -78,41 +56,12 @@ public class Device {
         return firmwareVersion;
     }
 
-    public DateTime getLastUpdated() {
+    public long getLastUpdated() {
         return lastUpdated;
     }
 
     public Color getColor() {
         return color;
-    }
-
-    public boolean exists() {
-        return exists;
-    }
-
-    /**
-     * Returns the number of hours since the device was last updated.
-     * <p/>
-     * Returns 0 if the device has not reported being update yet. This state
-     * happens immediately after a device has been paired to an account.
-     */
-    public int getHoursSinceLastUpdated() {
-        if (lastUpdated != null) {
-            return Hours.hoursBetween(lastUpdated, DateTime.now()).getHours();
-        } else {
-            return 0;
-        }
-    }
-
-    /**
-     * Returns whether or not the device is considered to be missing.
-     * <p/>
-     * Differs from {@link #getHoursSinceLastUpdated()} by considering
-     * a missing last updated value to indicate a device is missing.
-     */
-    public boolean isMissing() {
-        return (!exists || (getLastUpdated() == null) ||
-                (getHoursSinceLastUpdated() >= MISSING_THRESHOLD_HRS));
     }
 
     @Override
@@ -124,7 +73,6 @@ public class Device {
                 ", firmwareVersion='" + firmwareVersion + '\'' +
                 ", lastUpdated=" + lastUpdated +
                 ", color=" + color +
-                ", exists=" + exists +
                 '}';
     }
 

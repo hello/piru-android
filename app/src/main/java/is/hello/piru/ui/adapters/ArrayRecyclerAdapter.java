@@ -29,7 +29,7 @@ public abstract class ArrayRecyclerAdapter<T, VH extends RecyclerView.ViewHolder
         return storage.isEmpty();
     }
 
-    public T get(int position) {
+    public T getItem(int position) {
         return storage.get(position);
     }
 

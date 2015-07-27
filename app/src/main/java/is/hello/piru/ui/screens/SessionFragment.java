@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import is.hello.piru.R;
 import is.hello.piru.api.SessionPresenter;
 import is.hello.piru.ui.dialogs.ErrorDialogFragment;
+import is.hello.piru.ui.dialogs.LoadingDialogFragment;
 import is.hello.piru.ui.screens.base.BaseFragment;
 import is.hello.piru.ui.util.Input;
 
@@ -106,10 +107,17 @@ public class SessionFragment extends BaseFragment {
 
         Input.closeSoftKeyboard(passwordText);
 
+        LoadingDialogFragment.show(getFragmentManager());
         subscribe(presenter.authorize(email, password), session -> {
+            LoadingDialogFragment.close(getFragmentManager());
+
             emailText.setText(null);
             passwordText.setText(null);
+
+            getNavigation().pushFragment(new SenseFragment());
         }, error -> {
+            LoadingDialogFragment.close(getFragmentManager());
+
             ErrorDialogFragment errorDialogFragment = new ErrorDialogFragment.Builder()
                     .withError(error)
                     .build();

@@ -8,17 +8,12 @@ import android.support.v7.app.AppCompatActivity;
 
 import is.hello.piru.R;
 import is.hello.piru.ui.navigation.Navigation;
-import is.hello.piru.ui.screens.SessionFragment;
 
 public class MainActivity extends AppCompatActivity implements Navigation {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        if (savedInstanceState == null) {
-            pushFragment(new SessionFragment());
-        }
     }
 
     @Override
