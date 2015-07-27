@@ -1,24 +1,18 @@
 package is.hello.piru.ui.screens;
 
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
 
 import javax.inject.Inject;
 
-import is.hello.piru.R;
 import is.hello.piru.bluetooth.SensePresenter;
+import is.hello.piru.ui.screens.base.RecyclerFragment;
 
-public class SenseFragment extends BaseFragment {
+public class SenseFragment extends RecyclerFragment {
     @Inject SensePresenter presenter;
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_sense, container, false);
+    protected void onConfigureRecycler(@NonNull RecyclerView recyclerView) {
 
-        return view;
     }
 }

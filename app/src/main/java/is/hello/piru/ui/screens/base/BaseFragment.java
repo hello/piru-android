@@ -1,4 +1,4 @@
-package is.hello.piru.ui.screens;
+package is.hello.piru.ui.screens.base;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;

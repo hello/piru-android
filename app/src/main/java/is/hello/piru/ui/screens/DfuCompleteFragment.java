@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import is.hello.piru.R;
+import is.hello.piru.ui.screens.base.BaseFragment;
 
 public class DfuCompleteFragment extends BaseFragment {
     @Override
