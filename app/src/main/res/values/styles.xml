@@ -4,9 +4,15 @@
         <item name="android:windowBackground">@color/background</item>
 
         <item name="colorAccent">@color/secondary_dark</item>
+        <item name="colorButtonNormal">@color/secondary_dark</item>
 
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>
+    </style>
+
+    <style name="AppTheme.ColorButton" parent="Base.Widget.AppCompat.Button">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:minHeight">55dp</item>
     </style>
 
 </resources>

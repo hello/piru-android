@@ -1,6 +1,7 @@
 package is.hello.piru.ui.adapters;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.List;
 
 public abstract class ArrayRecyclerAdapter<T, VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
     private final List<T> storage;
+    private @Nullable OnItemClickedListener<T> onItemClickedListener;
 
     protected ArrayRecyclerAdapter(@NonNull List<T> storage) {
         this.storage = storage;
@@ -73,6 +75,26 @@ public abstract class ArrayRecyclerAdapter<T, VH extends RecyclerView.ViewHolder
         int oldSize = storage.size();
         storage.clear();
         notifyItemRangeRemoved(0, oldSize);
+    }
+
+    //endregion
+
+
+    //region Selection Support
+
+    public void setOnItemClickedListener(@Nullable OnItemClickedListener<T> onItemClickedListener) {
+        this.onItemClickedListener = onItemClickedListener;
+    }
+
+    protected void dispatchItemClicked(int position) {
+        if (onItemClickedListener != null) {
+            T item = getItem(position);
+            onItemClickedListener.onItemClicked(position, item);
+        }
+    }
+
+    public interface OnItemClickedListener<T> {
+        void onItemClicked(int position, T item);
     }
 
     //endregion

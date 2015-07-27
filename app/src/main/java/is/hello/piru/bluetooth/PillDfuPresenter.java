@@ -18,13 +18,22 @@ import javax.inject.Singleton;
 import is.hello.buruberi.bluetooth.errors.BluetoothGattError;
 import is.hello.buruberi.bluetooth.stacks.BluetoothStack;
 import is.hello.buruberi.bluetooth.stacks.Peripheral;
+import is.hello.buruberi.bluetooth.stacks.util.AdvertisingData;
 import is.hello.buruberi.bluetooth.stacks.util.PeripheralCriteria;
 import is.hello.buruberi.util.Rx;
 import rx.Observable;
+import rx.subjects.ReplaySubject;
 
 @Singleton public class PillDfuPresenter {
+    public static final String SERVICE_ID_128_BIT = "23D1BCEA5F782315DEEF121210E10000";
+
     private final Context context;
     private final BluetoothStack bluetoothStack;
+    private PendingObservables<String> pending = new PendingObservables<>();
+
+    public final ReplaySubject<List<Peripheral>> sleepPills = ReplaySubject.createWithSize(1);
+    private boolean hasScanned = false;
+
 
     //region Lifecycle
 
@@ -37,20 +46,45 @@ import rx.Observable;
     //endregion
 
 
-    //region Pill Interactions
+    //region Scanning
 
-    public Observable<List<Peripheral>> scanForPills(boolean includeHighPowerPreScan) {
-        PeripheralCriteria criteria = new PeripheralCriteria();
-        criteria.setWantsHighPowerPreScan(includeHighPowerPreScan);
-        return bluetoothStack.discoverPeripherals(criteria);
+    private Observable<List<Peripheral>> scanForPills() {
+        return pending.bind("scanForPills", () -> {
+            PeripheralCriteria criteria = new PeripheralCriteria();
+            criteria.setDuration(PeripheralCriteria.DEFAULT_DURATION_MS * 2);
+            criteria.addExactMatchPredicate(AdvertisingData.TYPE_LIST_OF_128_BIT_SERVICE_CLASS_UUIDS, SERVICE_ID_128_BIT);
+            return bluetoothStack.discoverPeripherals(criteria);
+        });
     }
 
-    public Observable<ComponentName> startDfuService(@NonNull Peripheral peripheral, @NonNull Uri imageUri) {
+    public boolean hasScanned() {
+        return hasScanned;
+    }
+
+    public void update() {
+        Log.d(getClass().getSimpleName(), "update()");
+
+        this.hasScanned = true;
+
+        scanForPills().subscribe(pills -> {
+            Log.d(getClass().getSimpleName(), "Found pills " + pills);
+            sleepPills.onNext(pills);
+        }, error -> {
+            Log.e(getClass().getSimpleName(), "Could not scan for pills", error);
+        });
+    }
+
+    //endregion
+
+
+    //region Pill Interactions
+
+    public Observable<ComponentName> startDfuService(@NonNull String name, @NonNull String address, @NonNull Uri imageUri) {
         return Observable.<ComponentName>create(subscriber -> {
             Intent intent = new Intent(context, DfuService.class);
 
-            intent.putExtra(DfuService.EXTRA_DEVICE_NAME, peripheral.getName());
-            intent.putExtra(DfuService.EXTRA_DEVICE_ADDRESS, peripheral.getAddress());
+            intent.putExtra(DfuService.EXTRA_DEVICE_NAME, name);
+            intent.putExtra(DfuService.EXTRA_DEVICE_ADDRESS, address);
             intent.putExtra(DfuService.EXTRA_FILE_TYPE, DfuService.TYPE_APPLICATION);
             intent.putExtra(DfuService.EXTRA_FILE_MIME_TYPE, DfuService.MIME_TYPE_OCTET_STREAM);
             intent.putExtra(DfuService.EXTRA_FILE_URI, imageUri);

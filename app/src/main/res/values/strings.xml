@@ -1,17 +1,10 @@
 <resources>
     <string name="app_name">Piru</string>
-
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
-    <string name="sign_in">Sign In</string>
-    <string name="title_email">Email</string>
-    <string name="title_password">Password</string>
-    <string name="signed_in">Signed in</string>
-    <string name="sign_out">Sign out</string>
-    <string name="error_message_generic">An error has occurred.</string>
     <string name="title_error">Error</string>
-    <string name="error_credentials_missing">You must enter your email and password.</string>
+    <string name="error_message_generic">An error has occurred.</string>
     <string name="action_next">Next</string>
-    <string name="error_wrong_device_selection">Please select one Sense, and one Sleep Pill.</string>
     <string name="title_loading">Loading…</string>
+    <string name="title_intro">Activate Sleep Pill Bluetooth Low Energy</string>
+    <string name="info_intro">To begin, you must activate Bluetooth Low Energy mode on your Sleep Pill. To do this, place a magnet just above the hinge on the side of your Sleep Pill that says “Hello” for a few seconds.\n\nPress next after you‘ve done this.</string>
+    <string name="message_no_pills">No Pills Found</string>
 </resources>
