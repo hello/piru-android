@@ -19,10 +19,9 @@ public class MainActivity extends AppCompatActivity implements Navigation, Fragm
         setContentView(R.layout.activity_main);
 
         getSupportFragmentManager().addOnBackStackChangedListener(this);
+        pushFragment(new SelectImageFragment(), Navigation.FLAG_MAKE_HISTORY_ROOT);
 
-        if (savedInstanceState == null) {
-            pushFragment(new SelectImageFragment(), Navigation.FLAGS_DEFAULT);
-        }
+        updateUpButton();
     }
 
     @Override
@@ -30,6 +29,12 @@ public class MainActivity extends AppCompatActivity implements Navigation, Fragm
         super.onDestroy();
 
         getSupportFragmentManager().removeOnBackStackChangedListener(this);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        popFragment();
+        return true;
     }
 
     @Nullable
@@ -49,8 +54,9 @@ public class MainActivity extends AppCompatActivity implements Navigation, Fragm
         String tag = fragment.getNavigationTag();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         if (fragmentManager.findFragmentById(R.id.activity_main_container) != null) {
+            transaction.setCustomAnimations(R.anim.fade_slide_up, R.anim.fade_slide_down,
+                    0, android.R.anim.fade_out);
             transaction.replace(R.id.activity_main_container, fragment, tag);
-            transaction.setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
             transaction.addToBackStack(tag);
         } else {
             transaction.add(R.id.activity_main_container, fragment, tag);
@@ -82,18 +88,24 @@ public class MainActivity extends AppCompatActivity implements Navigation, Fragm
     @Override
     public void onBackStackChanged() {
         showFragmentTitles(getTopFragment());
+        updateUpButton();
     }
 
+    @SuppressWarnings("ConstantConditions")
+    private void updateUpButton() {
+        boolean canGoBack = getSupportFragmentManager().getBackStackEntryCount() > 0;
+        getSupportActionBar().setDisplayHomeAsUpEnabled(canGoBack);
+    }
+
+    @SuppressWarnings("ConstantConditions")
     private void showFragmentTitles(@Nullable Navigation.Fragment fragment) {
         ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            if (fragment != null) {
-                actionBar.setTitle(fragment.getNavigationTitle(this));
-                actionBar.setSubtitle(fragment.getNavigationSubtitle(this));
-            } else {
-                actionBar.setTitle(R.string.app_name);
-                actionBar.setSubtitle(null);
-            }
+        if (fragment != null) {
+            actionBar.setTitle(fragment.getNavigationTitle(this));
+            actionBar.setSubtitle(fragment.getNavigationSubtitle(this));
+        } else {
+            actionBar.setTitle(R.string.app_name);
+            actionBar.setSubtitle(null);
         }
     }
 }
