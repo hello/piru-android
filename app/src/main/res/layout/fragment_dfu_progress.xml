@@ -1,6 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/fragment_dfu_progress_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/gap_outer"
+        android:layout_marginLeft="@dimen/gap_outer"
+        android:layout_marginRight="@dimen/gap_outer"
+        android:layout_marginBottom="@dimen/gap_inter"
+        android:text="@string/dfu_status_waiting"
+        android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+
+    <ProgressBar
+        android:id="@+id/fragment_dfu_progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/gap_outer"
+        android:layout_marginRight="@dimen/gap_outer"
+        android:layout_marginBottom="@dimen/gap_outer"
+        android:max="100"
+        android:progress="0"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal" />
+
+    <View style="@style/Divider.Horizontal" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/fragment_dfu_progress_log"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/log_background" />
+
+    <Button
+        android:id="@+id/fragment_dfu_progress_control"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/gap_outer"
+        android:text="@string/action_start" />
 
 </LinearLayout>

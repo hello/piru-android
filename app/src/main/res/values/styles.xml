@@ -4,15 +4,38 @@
         <item name="android:windowBackground">@color/background</item>
 
         <item name="colorAccent">@color/secondary_dark</item>
-        <item name="colorButtonNormal">@color/primary</item>
 
-        <item name="colorPrimary">@color/primary</item>
+        <item name="android:buttonStyle">@style/AppTheme.Button</item>
+        <item name="android:textAppearanceButton">@style/AppTheme.Text.Button</item>
+        <item name="colorButtonNormal">@color/primary_normal</item>
+        <item name="colorControlActivated">@color/primary_normal</item>
+        <item name="colorControlHighlight">@color/primary_dark</item>
+
+        <item name="colorPrimary">@color/primary_normal</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>
     </style>
 
-    <style name="AppTheme.ColorButton" parent="Base.Widget.AppCompat.Button">
-        <item name="android:textColor">@android:color/white</item>
+    <style name="AppTheme.Text" parent="TextAppearance.AppCompat" />
+    <style name="AppTheme.Text.Button" parent="TextAppearance.AppCompat.Button">
+        <item name="android:textColor">@color/button_material_light</item>
+    </style>
+
+    <style name="AppTheme.Button" parent="Widget.AppCompat.Button">
         <item name="android:minHeight">55dp</item>
+    </style>
+
+    <style name="Divider">
+        <item name="android:background">@color/divider</item>
+    </style>
+
+    <style name="Divider.Vertical">
+        <item name="android:layout_width">@dimen/divider_height</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
+
+    <style name="Divider.Horizontal">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/divider_height</item>
     </style>
 
 </resources>

@@ -11,4 +11,14 @@
     <string name="title_getting_started">Getting Started</string>
     <string name="title_select_sleep_pill">Select Sleep Pill</string>
     <string name="title_scanning">Scanning</string>
+    <string name="dfu_status_waiting">Waiting…</string>
+    <string name="dfu_status_connecting">Connecting</string>
+    <string name="dfu_status_starting">Starting</string>
+    <string name="dfu_status_enabling_dfu_mode">Enabling dfu mode</string>
+    <string name="dfu_status_validation">Validating</string>
+    <string name="dfu_status_disconnecting">Disconnecting</string>
+    <string name="dfu_status_completed">Done</string>
+    <string name="dfu_status_aborted">Aborted</string>
+    <string name="action_start">Start</string>
+    <string name="action_abort">Abort</string>
 </resources>

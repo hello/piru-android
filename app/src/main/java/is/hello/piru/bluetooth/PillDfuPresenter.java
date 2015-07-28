@@ -7,12 +7,14 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.util.Pair;
 
 import java.io.FileNotFoundException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -23,6 +25,7 @@ import is.hello.buruberi.bluetooth.stacks.BluetoothStack;
 import is.hello.buruberi.bluetooth.stacks.util.PeripheralCriteria;
 import is.hello.buruberi.util.Either;
 import is.hello.buruberi.util.Rx;
+import is.hello.piru.R;
 import is.hello.piru.ui.util.FileUtils;
 import rx.Observable;
 import rx.subjects.ReplaySubject;
@@ -95,13 +98,18 @@ import rx.subjects.ReplaySubject;
         this.selectedPeripheral = selectedPeripheral;
     }
 
-    public Observable<Void> enterDfuMode() {
+    public boolean isPillInDfuMode() {
+        return (selectedPeripheral != null && selectedPeripheral.isInDfuMode());
+    }
+
+    public Observable<PillPeripheral> enterDfuMode() {
         if (selectedPeripheral == null) {
             return Observable.error(new PeripheralNotFoundError());
         }
 
         return selectedPeripheral.connect()
-                                 .flatMap(PillPeripheral::wipeFirmware);
+                                 .flatMap(PillPeripheral::wipeFirmware)
+                                 .delay(3, TimeUnit.SECONDS);
     }
 
     public Observable<ComponentName> startDfuService() {
@@ -137,16 +145,19 @@ import rx.subjects.ReplaySubject;
         }).subscribeOn(Rx.mainThreadScheduler());
     }
 
-    public Observable<Integer> dfuProgress() {
+    public Observable<Progress> dfuProgress() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(DfuService.BROADCAST_ERROR);
         filter.addAction(DfuService.BROADCAST_PROGRESS);
+        Progress progress = new Progress();
         return Rx.fromLocalBroadcast(context, filter).flatMap(broadcast -> {
             if (DfuService.BROADCAST_ERROR.equals(broadcast.getAction())) {
                 int errorCode = broadcast.getIntExtra(DfuService.EXTRA_DATA, BluetoothGattError.GATT_STACK_ERROR);
-                return Observable.error(new BluetoothGattError(errorCode, null));
+                return Observable.error(new DfuService.Error(errorCode));
             } else {
-                int progress = broadcast.getIntExtra(DfuService.EXTRA_DATA, 0);
+                progress.status = broadcast.getIntExtra(DfuService.EXTRA_DATA, 0);
+                progress.totalParts = broadcast.getIntExtra(DfuService.EXTRA_PARTS_TOTAL, 0);
+                progress.currentPart = broadcast.getIntExtra(DfuService.EXTRA_PART_CURRENT, 0);
                 return Observable.just(progress);
             }
         });
@@ -180,4 +191,43 @@ import rx.subjects.ReplaySubject;
     }
 
     //endregion
+
+
+    public static class Progress {
+        public int status;
+        public int totalParts;
+        public int currentPart;
+
+
+        public @StringRes int getStatus() {
+            switch (status) {
+                case DfuService.PROGRESS_CONNECTING:
+                    return R.string.dfu_status_connecting;
+                case DfuService.PROGRESS_STARTING:
+                    return R.string.dfu_status_starting;
+                case DfuService.PROGRESS_ENABLING_DFU_MODE:
+                    return R.string.dfu_status_enabling_dfu_mode;
+                case DfuService.PROGRESS_VALIDATING:
+                    return R.string.dfu_status_validating;
+                case DfuService.PROGRESS_DISCONNECTING:
+                    return R.string.dfu_status_disconnecting;
+                case DfuService.PROGRESS_COMPLETED:
+                    return R.string.dfu_status_completed;
+                case DfuService.PROGRESS_ABORTED:
+                    return R.string.dfu_status_aborted;
+                default:
+                    return R.string.dfu_status_waiting;
+            }
+        }
+
+
+        @Override
+        public String toString() {
+            return "Progress{" +
+                    "status=" + status +
+                    ", totalParts=" + totalParts +
+                    ", currentPart=" + currentPart +
+                    '}';
+        }
+    }
 }

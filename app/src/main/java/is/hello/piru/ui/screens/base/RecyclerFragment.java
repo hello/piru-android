@@ -44,8 +44,8 @@ public abstract class RecyclerFragment extends BaseFragment implements SwipeRefr
         this.busyIndicator = (ProgressBar) view.findViewById(R.id.fragment_recycler_busy);
         this.empty = (TextView) view.findViewById(R.id.fragment_recycler_empty);
 
-        swipeRefreshLayout.setColorSchemeResources(R.color.primary, R.color.primary_dark,
-                R.color.secondary, R.color.secondary_dark);
+        swipeRefreshLayout.setColorSchemeResources(R.color.primary_normal, R.color.primary_dark,
+                R.color.secondary_normal, R.color.secondary_dark);
         swipeRefreshLayout.setEnabled(!busy);
         swipeRefreshLayout.setOnRefreshListener(this);
 

@@ -15,15 +15,17 @@ import is.hello.buruberi.bluetooth.stacks.OperationTimeout;
 import is.hello.buruberi.bluetooth.stacks.Peripheral;
 import is.hello.buruberi.bluetooth.stacks.PeripheralService;
 import is.hello.buruberi.bluetooth.stacks.util.AdvertisingData;
+import is.hello.buruberi.bluetooth.stacks.util.Bytes;
 import is.hello.buruberi.bluetooth.stacks.util.PeripheralCriteria;
 import rx.Observable;
 
 public final class PillPeripheral {
     //region Identifiers
 
-    private static final String ADVERTISEMENT_SERVICE_128_BIT = "23D1BCEA5F782315DEEF121210E10000";
+    private static final byte[] NORMAL_ADVERTISEMENT_SERVICE_128_BIT = Bytes.fromString("23D1BCEA5F782315DEEF121210E10000");
+    private static final byte[] DFU_ADVERTISEMENT_SERVICE_128_BIT = Bytes.fromString("23D1BCEA5F782315DEEF121230150000");
 
-    private static final UUID SERVICE = UUID.fromString("23D1BCEA-5F78-2315-DEEF-121210E10000");
+    private static final UUID SERVICE = UUID.fromString("0000e110-1212-efde-1523-785feabcd123");
     private static final UUID CHARACTERISTIC_COMMAND_UUID = UUID.fromString("0000DEED-0000-1000-8000-00805F9B34FB");
 
     private static final byte COMMAND_WIPE_FIRMWARE = 8;
@@ -34,6 +36,7 @@ public final class PillPeripheral {
     //region Fields
 
     private final Peripheral peripheral;
+    private final boolean inDfuMode;
     private PeripheralService service;
 
     //endregion
@@ -43,25 +46,38 @@ public final class PillPeripheral {
 
     public static Observable<List<PillPeripheral>> discover(@NonNull BluetoothStack bluetoothStack,
                                                             @NonNull PeripheralCriteria criteria) {
-        criteria.setDuration(PeripheralCriteria.DEFAULT_DURATION_MS * 2);
-        criteria.addExactMatchPredicate(AdvertisingData.TYPE_LIST_OF_128_BIT_SERVICE_CLASS_UUIDS, ADVERTISEMENT_SERVICE_128_BIT);
-        return bluetoothStack.discoverPeripherals(criteria).map(peripherals -> {
-            List<PillPeripheral> pillPeripherals = new ArrayList<>();
-            for (Peripheral peripheral : peripherals) {
-                pillPeripherals.add(new PillPeripheral(peripheral));
-            }
-            return pillPeripherals;
+        criteria.addPredicate(ad -> {
+            return (ad.anyRecordMatches(AdvertisingData.TYPE_LIST_OF_128_BIT_SERVICE_CLASS_UUIDS,
+                            b -> Arrays.equals(NORMAL_ADVERTISEMENT_SERVICE_128_BIT, b)) ||
+                    ad.anyRecordMatches(AdvertisingData.TYPE_INCOMPLETE_LIST_OF_128_BIT_SERVICE_CLASS_UUIDS,
+                            b -> Arrays.equals(DFU_ADVERTISEMENT_SERVICE_128_BIT, b)));
         });
+        return bluetoothStack.discoverPeripherals(criteria)
+                             .map(peripherals -> {
+                                 List<PillPeripheral> pillPeripherals = new ArrayList<>();
+                                 for (Peripheral peripheral : peripherals) {
+                                     pillPeripherals.add(new PillPeripheral(peripheral));
+                                 }
+                                 return pillPeripherals;
+                             });
     }
 
     PillPeripheral(@NonNull Peripheral peripheral) {
         this.peripheral = peripheral;
+
+        AdvertisingData advertisingData = peripheral.getAdvertisingData();
+        this.inDfuMode = advertisingData.anyRecordMatches(AdvertisingData.TYPE_INCOMPLETE_LIST_OF_128_BIT_SERVICE_CLASS_UUIDS,
+                b -> Arrays.equals(DFU_ADVERTISEMENT_SERVICE_128_BIT, b));
     }
 
     //endregion
 
 
     //region Attributes
+
+    public boolean isInDfuMode() {
+        return inDfuMode;
+    }
 
     public int getScanTimeRssi() {
         return peripheral.getScanTimeRssi();
@@ -93,6 +109,10 @@ public final class PillPeripheral {
     @NonNull
     public Observable<PillPeripheral> connect() {
         Log.d(getClass().getSimpleName(), "connect()");
+
+        if (inDfuMode) {
+            return Observable.error(new IllegalStateException("Cannot connect to sleep pill in dfu mode."));
+        }
 
         OperationTimeout operationTimeout = createOperationTimeout("Connect");
         return peripheral.connect(operationTimeout)
@@ -139,11 +159,15 @@ public final class PillPeripheral {
         return peripheral.writeCommand(service, identifier, writeType, payload, createOperationTimeout("Write Command"));
     }
 
-    public Observable<Void> wipeFirmware() {
+    public Observable<PillPeripheral> wipeFirmware() {
         Log.d(getClass().getSimpleName(), "wipeFirmware()");
 
         byte[] payload = { COMMAND_WIPE_FIRMWARE };
-        return writeCommand(CHARACTERISTIC_COMMAND_UUID, Peripheral.WriteType.NO_RESPONSE, payload);
+        return writeCommand(CHARACTERISTIC_COMMAND_UUID, Peripheral.WriteType.NO_RESPONSE, payload)
+                .flatMap(ignored -> {
+                    Log.d(getClass().getSimpleName(), "wipeFirmware command written");
+                    return disconnect();
+                });
     }
 
     //endregion
