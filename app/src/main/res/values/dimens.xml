@@ -3,4 +3,6 @@
     <dimen name="gap_inter">8dp</dimen>
 
     <dimen name="elevation_card">2dp</dimen>
+    <dimen name="divider_height">1px</dimen>
+    <dimen name="shadow_height">3dp</dimen>
 </resources>

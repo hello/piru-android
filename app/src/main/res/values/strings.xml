@@ -5,7 +5,10 @@
     <string name="action_next">Next</string>
     <string name="title_loading">Loading…</string>
     <string name="title_intro">Activate Sleep Pill Bluetooth Low Energy</string>
-    <string name="info_intro">To begin, you must activate Bluetooth Low Energy mode on your Sleep Pill. To do this, place a magnet just above the hinge on the side of your Sleep Pill that says “Hello” for a few seconds.\n\nPress next after you‘ve done this.</string>
+    <string name="info_intro">To begin, you must activate Bluetooth Low Energy mode on your Sleep Pill. To do this, place your Sleep Pill in the tray that it came in with your Sense. The Hello logo should be face-down on the tray, and the grey hinge should line up with the indent in the tray slot. Leave in place for 10 seconds, then remove it. Your pill should be discoverable for 5 minutes after this.\n\nIf you do not have the tray, you can place a magnet over the Hello logo for 10 seconds.\n\nAfter you‘ve done this, press next.</string>
     <string name="message_no_pills">No Pills Found</string>
     <string name="title_select">Select</string>
+    <string name="title_getting_started">Getting Started</string>
+    <string name="title_select_sleep_pill">Select Sleep Pill</string>
+    <string name="title_scanning">Scanning</string>
 </resources>

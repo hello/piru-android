@@ -21,6 +21,7 @@ import is.hello.buruberi.bluetooth.errors.BluetoothGattError;
 import is.hello.buruberi.bluetooth.errors.PeripheralNotFoundError;
 import is.hello.buruberi.bluetooth.stacks.BluetoothStack;
 import is.hello.buruberi.bluetooth.stacks.util.PeripheralCriteria;
+import is.hello.buruberi.util.Either;
 import is.hello.buruberi.util.Rx;
 import is.hello.piru.ui.util.FileUtils;
 import rx.Observable;
@@ -31,8 +32,9 @@ import rx.subjects.ReplaySubject;
     private final BluetoothStack bluetoothStack;
     private PendingObservables<String> pending = new PendingObservables<>();
 
-    public final ReplaySubject<List<PillPeripheral>> sleepPills = ReplaySubject.createWithSize(1);
+    public final ReplaySubject<Either<List<PillPeripheral>, Throwable>> sleepPills = ReplaySubject.createWithSize(1);
     private boolean hasScanned = false;
+    private boolean scanning = false;
     private @Nullable PillPeripheral selectedPeripheral;
 
     private @Nullable Uri imageUri;
@@ -59,16 +61,24 @@ import rx.subjects.ReplaySubject;
         return hasScanned;
     }
 
+    public boolean isScanning() {
+        return scanning;
+    }
+
     public void update() {
         Log.d(getClass().getSimpleName(), "update()");
 
         this.hasScanned = true;
+        this.scanning = true;
 
         scanForPills().subscribe(pills -> {
             Log.d(getClass().getSimpleName(), "Found pills " + pills);
-            sleepPills.onNext(pills);
+            this.scanning = false;
+            sleepPills.onNext(Either.left(pills));
         }, error -> {
             Log.e(getClass().getSimpleName(), "Could not scan for pills", error);
+            this.scanning = false;
+            sleepPills.onNext(Either.right(error));
         });
     }
 

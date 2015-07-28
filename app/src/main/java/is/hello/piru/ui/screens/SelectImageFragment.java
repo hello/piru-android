@@ -1,6 +1,7 @@
 package is.hello.piru.ui.screens;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -33,6 +34,11 @@ public class SelectImageFragment extends BaseFragment {
         select.setOnClickListener(this::select);
 
         return view;
+    }
+
+    @Override
+    public CharSequence getNavigationSubtitle(@NonNull Context context) {
+        return "Select Firmware Image";
     }
 
     public void select(@NonNull View ignored) {

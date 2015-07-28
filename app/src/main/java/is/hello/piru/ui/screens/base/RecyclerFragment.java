@@ -101,6 +101,8 @@ public abstract class RecyclerFragment extends BaseFragment implements SwipeRefr
                     busyIndicator.setVisibility(View.GONE);
                 }
             }
+
+            invalidateTitles();
         }
     }
 

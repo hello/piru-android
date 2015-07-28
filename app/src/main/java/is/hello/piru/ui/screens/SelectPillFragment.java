@@ -1,5 +1,6 @@
 package is.hello.piru.ui.screens;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -10,10 +11,14 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import is.hello.buruberi.util.Either;
+import is.hello.buruberi.util.Errors;
+import is.hello.buruberi.util.StringRef;
 import is.hello.piru.R;
 import is.hello.piru.bluetooth.PillDfuPresenter;
 import is.hello.piru.bluetooth.PillPeripheral;
 import is.hello.piru.ui.adapters.ArrayRecyclerAdapter;
+import is.hello.piru.ui.adapters.HorizontalDividerDecoration;
 import is.hello.piru.ui.adapters.PillsAdapter;
 import is.hello.piru.ui.screens.base.RecyclerFragment;
 
@@ -37,6 +42,8 @@ public class SelectPillFragment extends RecyclerFragment implements ArrayRecycle
 
     @Override
     protected void onConfigureRecycler(@NonNull RecyclerView recyclerView) {
+        recyclerView.addItemDecoration(new HorizontalDividerDecoration(getResources()));
+
         this.adapter = new PillsAdapter(getActivity());
         adapter.setOnItemClickedListener(this);
         recyclerView.setAdapter(adapter);
@@ -47,7 +54,7 @@ public class SelectPillFragment extends RecyclerFragment implements ArrayRecycle
         super.onViewCreated(view, savedInstanceState);
 
         setBusy(true);
-        subscribe(presenter.sleepPills, this::bindPills);
+        subscribe(presenter.sleepPills, this::bind);
     }
 
     @Override
@@ -57,6 +64,20 @@ public class SelectPillFragment extends RecyclerFragment implements ArrayRecycle
         this.adapter = null;
     }
 
+    @Override
+    public CharSequence getNavigationTitle(@NonNull Context context) {
+        return context.getString(R.string.title_select_sleep_pill);
+    }
+
+    @Override
+    public CharSequence getNavigationSubtitle(@NonNull Context context) {
+        if (presenter.isScanning()) {
+            return context.getString(R.string.title_scanning);
+        } else {
+            return null;
+        }
+    }
+
     //endregion
 
 
@@ -64,21 +85,30 @@ public class SelectPillFragment extends RecyclerFragment implements ArrayRecycle
 
     @Override
     public void onRefresh() {
-        setBusy(true);
         presenter.update();
+        setBusy(true);
     }
 
-    public void bindPills(@NonNull List<PillPeripheral> pills) {
+    public void bind(@NonNull Either<List<PillPeripheral>, Throwable> result) {
         setBusy(false);
 
         adapter.clear();
-        adapter.addAll(pills);
+        result.match(pills -> {
+            adapter.addAll(pills);
 
-        if (pills.isEmpty()) {
-            setEmpty(getString(R.string.message_no_pills));
-        } else {
-            setEmpty(null);
-        }
+            if (pills.isEmpty()) {
+                setEmpty(getString(R.string.message_no_pills));
+            } else {
+                setEmpty(null);
+            }
+        }, error -> {
+            StringRef message = Errors.getDisplayMessage(error);
+            if (message != null) {
+                setEmpty(message.resolve(getActivity()));
+            } else {
+                setEmpty(error.getMessage());
+            }
+        });
     }
 
     @Override
