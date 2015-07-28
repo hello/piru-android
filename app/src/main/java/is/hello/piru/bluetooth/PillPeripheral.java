@@ -46,6 +46,7 @@ public final class PillPeripheral {
 
     public static Observable<List<PillPeripheral>> discover(@NonNull BluetoothStack bluetoothStack,
                                                             @NonNull PeripheralCriteria criteria) {
+        criteria.setDuration(PeripheralCriteria.DEFAULT_DURATION_MS * 2);
         criteria.addPredicate(ad -> {
             return (ad.anyRecordMatches(AdvertisingData.TYPE_LIST_OF_128_BIT_SERVICE_CLASS_UUIDS,
                             b -> Arrays.equals(NORMAL_ADVERTISEMENT_SERVICE_128_BIT, b)) ||

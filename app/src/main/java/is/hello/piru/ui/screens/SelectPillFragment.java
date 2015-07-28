@@ -11,7 +11,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import is.hello.buruberi.util.Either;
 import is.hello.buruberi.util.Errors;
 import is.hello.buruberi.util.StringRef;
 import is.hello.piru.R;
@@ -20,6 +19,7 @@ import is.hello.piru.bluetooth.PillPeripheral;
 import is.hello.piru.ui.adapters.ArrayRecyclerAdapter;
 import is.hello.piru.ui.adapters.HorizontalDividerDecoration;
 import is.hello.piru.ui.adapters.PillsAdapter;
+import is.hello.piru.ui.navigation.Navigation;
 import is.hello.piru.ui.screens.base.RecyclerFragment;
 
 public class SelectPillFragment extends RecyclerFragment implements ArrayRecyclerAdapter.OnItemClickedListener<PillPeripheral> {
@@ -54,7 +54,7 @@ public class SelectPillFragment extends RecyclerFragment implements ArrayRecycle
         super.onViewCreated(view, savedInstanceState);
 
         setBusy(true);
-        subscribe(presenter.sleepPills, this::bind);
+        subscribe(presenter.sleepPills, this::bindPills, this::presentError);
     }
 
     @Override
@@ -89,34 +89,38 @@ public class SelectPillFragment extends RecyclerFragment implements ArrayRecycle
         setBusy(true);
     }
 
-    public void bind(@NonNull Either<List<PillPeripheral>, Throwable> result) {
+    public void bindPills(@NonNull List<PillPeripheral>pills) {
         setBusy(false);
 
         adapter.clear();
-        result.match(pills -> {
-            adapter.addAll(pills);
+        adapter.addAll(pills);
 
-            if (pills.isEmpty()) {
-                setEmpty(getString(R.string.message_no_pills));
-            } else {
-                setEmpty(null);
-            }
-        }, error -> {
-            StringRef message = Errors.getDisplayMessage(error);
-            if (message != null) {
-                setEmpty(message.resolve(getActivity()));
-            } else {
-                setEmpty(error.getMessage());
-            }
-        });
+        if (pills.isEmpty()) {
+            setEmpty(getString(R.string.message_no_pills));
+        } else {
+            setEmpty(null);
+        }
+    }
+
+    public void presentError(Throwable error) {
+        setBusy(false);
+
+        adapter.clear();
+
+        StringRef message = Errors.getDisplayMessage(error);
+        if (message != null) {
+            setEmpty(message.resolve(getActivity()));
+        } else {
+            setEmpty(error.getMessage());
+        }
     }
 
     @Override
     public void onItemClicked(int position, PillPeripheral pill) {
-        presenter.setSelectedPeripheral(pill);
+        presenter.setTargetPill(pill);
 
         DfuProgressFragment fragment = new DfuProgressFragment();
-        getNavigation().pushFragment(fragment);
+        getNavigation().pushFragment(fragment, Navigation.FLAGS_DEFAULT);
     }
 
     //endregion

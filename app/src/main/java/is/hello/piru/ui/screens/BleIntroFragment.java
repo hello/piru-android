@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import is.hello.piru.R;
+import is.hello.piru.ui.navigation.Navigation;
 import is.hello.piru.ui.screens.base.BaseFragment;
 
 public class BleIntroFragment extends BaseFragment {
@@ -24,7 +25,7 @@ public class BleIntroFragment extends BaseFragment {
         View view = inflater.inflate(R.layout.fragment_intro, container, false);
 
         Button next = (Button) view.findViewById(R.id.fragment_intro_next);
-        next.setOnClickListener(ignored -> getNavigation().pushFragment(new SelectPillFragment()));
+        next.setOnClickListener(ignored -> getNavigation().pushFragment(new SelectPillFragment(), Navigation.FLAGS_DEFAULT));
 
         return view;
     }

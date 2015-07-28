@@ -1,5 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/gap_outer">
+
+    <TextView
+        android:id="@+id/fragment_dfu_complete_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/gap_outer"
+        android:layout_marginBottom="@dimen/gap_outer"
+        android:text="@string/title_success"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fragment_dfu_complete_title"
+        android:text="@string/info_success"
+        android:lineSpacingMultiplier="1.2"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+    <Button
+        android:id="@+id/fragment_dfu_complete_flash_another"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="@string/action_flash_another" />
+
+    <Button
+        android:id="@+id/fragment_dfu_complete_choose_new_image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/fragment_dfu_complete_flash_another"
+        android:text="@string/action_choose_new_image"
+        android:textColor="@color/primary_dark"
+        style="@style/Base.Widget.AppCompat.Button.Borderless.Colored" />
+
+    <Button
+        android:id="@+id/fragment_dfu_complete_exit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/fragment_dfu_complete_choose_new_image"
+        android:text="@string/action_exit"
+        style="@style/Base.Widget.AppCompat.Button.Borderless.Colored" />
 
 </RelativeLayout>

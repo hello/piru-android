@@ -21,4 +21,9 @@
     <string name="dfu_status_aborted">Aborted</string>
     <string name="action_start">Start</string>
     <string name="action_abort">Abort</string>
+    <string name="title_success">Success</string>
+    <string name="info_success">Your Sleep Pill‘s firmware was successfully updated to the selected image.\n\nTo verify your Sleep Pill is working correctly, you can shake it to trigger the color flash on Sense.</string>
+    <string name="action_flash_another">Flash Another</string>
+    <string name="action_choose_new_image">Choose New Image</string>
+    <string name="action_exit">Exit</string>
 </resources>

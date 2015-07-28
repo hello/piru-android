@@ -23,24 +23,22 @@ import is.hello.buruberi.bluetooth.errors.BluetoothGattError;
 import is.hello.buruberi.bluetooth.errors.PeripheralNotFoundError;
 import is.hello.buruberi.bluetooth.stacks.BluetoothStack;
 import is.hello.buruberi.bluetooth.stacks.util.PeripheralCriteria;
-import is.hello.buruberi.util.Either;
 import is.hello.buruberi.util.Rx;
 import is.hello.piru.R;
 import is.hello.piru.ui.util.FileUtils;
+import is.hello.piru.ui.util.PresenterSubject;
 import rx.Observable;
-import rx.subjects.ReplaySubject;
 
 @Singleton public class PillDfuPresenter {
     private final Context context;
     private final BluetoothStack bluetoothStack;
     private PendingObservables<String> pending = new PendingObservables<>();
 
-    public final ReplaySubject<Either<List<PillPeripheral>, Throwable>> sleepPills = ReplaySubject.createWithSize(1);
+    public final PresenterSubject<List<PillPeripheral>> sleepPills = PresenterSubject.create();
     private boolean hasScanned = false;
     private boolean scanning = false;
-    private @Nullable PillPeripheral selectedPeripheral;
-
-    private @Nullable Uri imageUri;
+    private @Nullable PillPeripheral targetPill;
+    private @Nullable Uri firmwareImage;
 
 
     //region Lifecycle
@@ -77,11 +75,11 @@ import rx.subjects.ReplaySubject;
         scanForPills().subscribe(pills -> {
             Log.d(getClass().getSimpleName(), "Found pills " + pills);
             this.scanning = false;
-            sleepPills.onNext(Either.left(pills));
+            sleepPills.onNext(pills);
         }, error -> {
             Log.e(getClass().getSimpleName(), "Could not scan for pills", error);
             this.scanning = false;
-            sleepPills.onNext(Either.right(error));
+            sleepPills.onError(error);
         });
     }
 
@@ -90,49 +88,65 @@ import rx.subjects.ReplaySubject;
 
     //region Pill Interactions
 
-    public void setImageUri(@NonNull Uri imageUri) {
-        this.imageUri = imageUri;
+    public void reset(boolean clearFirmwareImage) {
+        sleepPills.forget();
+
+        this.hasScanned = false;
+        this.scanning = false;
+        this.targetPill = null;
+
+        if (clearFirmwareImage) {
+            this.firmwareImage = null;
+        }
     }
 
-    public void setSelectedPeripheral(@Nullable PillPeripheral selectedPeripheral) {
-        this.selectedPeripheral = selectedPeripheral;
+    public void setFirmwareImage(@NonNull Uri firmwareImage) {
+        this.firmwareImage = firmwareImage;
+    }
+
+    public void setTargetPill(@Nullable PillPeripheral targetPill) {
+        this.targetPill = targetPill;
     }
 
     public boolean isPillInDfuMode() {
-        return (selectedPeripheral != null && selectedPeripheral.isInDfuMode());
+        return (targetPill != null && targetPill.isInDfuMode());
     }
 
     public Observable<PillPeripheral> enterDfuMode() {
-        if (selectedPeripheral == null) {
+        if (targetPill == null) {
             return Observable.error(new PeripheralNotFoundError());
         }
 
-        return selectedPeripheral.connect()
-                                 .flatMap(PillPeripheral::wipeFirmware)
-                                 .delay(3, TimeUnit.SECONDS);
+        return targetPill.connect()
+                         .flatMap(PillPeripheral::wipeFirmware)
+                         .delay(3, TimeUnit.SECONDS);
     }
 
     public Observable<ComponentName> startDfuService() {
         return Observable.<ComponentName>create(subscriber -> {
-            if (imageUri == null) {
+            if (firmwareImage == null) {
                 subscriber.onError(new FileNotFoundException());
                 return;
             }
 
-            if (selectedPeripheral == null) {
+            if (targetPill == null) {
                 subscriber.onError(new PeripheralNotFoundError());
                 return;
             }
 
             Intent intent = new Intent(context, DfuService.class);
 
-            intent.putExtra(DfuService.EXTRA_DEVICE_NAME, selectedPeripheral.getName());
-            intent.putExtra(DfuService.EXTRA_DEVICE_ADDRESS, selectedPeripheral.getAddress());
+            intent.putExtra(DfuService.EXTRA_DEVICE_NAME, targetPill.getName());
+            intent.putExtra(DfuService.EXTRA_DEVICE_ADDRESS, targetPill.getAddress());
             intent.putExtra(DfuService.EXTRA_FILE_TYPE, DfuService.TYPE_APPLICATION);
             intent.putExtra(DfuService.EXTRA_FILE_MIME_TYPE, DfuService.MIME_TYPE_OCTET_STREAM);
             intent.putExtra(DfuService.EXTRA_KEEP_BOND, false);
 
-            String path = FileUtils.getPath(context, imageUri);
+            String path = FileUtils.getPath(context, firmwareImage);
+            if (path == null) {
+                subscriber.onError(new FileNotFoundException());
+                return;
+            }
             intent.putExtra(DfuService.EXTRA_FILE_PATH, path);
 
             try {
@@ -218,6 +232,14 @@ import rx.subjects.ReplaySubject;
                 default:
                     return R.string.dfu_status_waiting;
             }
+        }
+
+        public boolean isCompleted() {
+            return (status == DfuService.PROGRESS_COMPLETED);
+        }
+
+        public boolean isAborted() {
+            return (status == DfuService.PROGRESS_ABORTED);
         }
 
 

@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity implements Navigation, Fragm
         getSupportFragmentManager().addOnBackStackChangedListener(this);
 
         if (savedInstanceState == null) {
-            pushFragment(new SelectImageFragment());
+            pushFragment(new SelectImageFragment(), Navigation.FLAGS_DEFAULT);
         }
     }
 
@@ -39,8 +39,12 @@ public class MainActivity extends AppCompatActivity implements Navigation, Fragm
     }
 
     @Override
-    public void pushFragment(@NonNull Navigation.Fragment fragment) {
+    public void pushFragment(@NonNull Fragment fragment, @PushOptions int options) {
         FragmentManager fragmentManager = getSupportFragmentManager();
+
+        if ((options & FLAG_MAKE_HISTORY_ROOT) == FLAG_MAKE_HISTORY_ROOT) {
+            fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        }
 
         String tag = fragment.getNavigationTag();
         FragmentTransaction transaction = fragmentManager.beginTransaction();

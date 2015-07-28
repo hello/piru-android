@@ -1,8 +1,6 @@
 <resources>
 
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="android:windowBackground">@color/background</item>
-
         <item name="colorAccent">@color/secondary_dark</item>
 
         <item name="android:buttonStyle">@style/AppTheme.Button</item>
@@ -17,11 +15,19 @@
 
     <style name="AppTheme.Text" parent="TextAppearance.AppCompat" />
     <style name="AppTheme.Text.Button" parent="TextAppearance.AppCompat.Button">
-        <item name="android:textColor">@color/button_material_light</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
     <style name="AppTheme.Button" parent="Widget.AppCompat.Button">
         <item name="android:minHeight">55dp</item>
+    </style>
+
+    <style name="AppTheme.ImageButton" parent="Base.Widget.AppCompat.Button" />
+    <style name="AppTheme.ImageButton.Borderless">
+        <item name="android:minWidth">40dp</item>
+        <item name="android:minHeight">40dp</item>
+        <item name="android:padding">@dimen/gap_inter</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
     </style>
 
     <style name="Divider">

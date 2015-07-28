@@ -1,8 +1,14 @@
 package is.hello.piru.ui.screens;
 
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
+import android.support.v4.content.res.ResourcesCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -10,7 +16,7 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -20,6 +26,7 @@ import is.hello.piru.R;
 import is.hello.piru.bluetooth.PillDfuPresenter;
 import is.hello.piru.ui.adapters.LogAdapter;
 import is.hello.piru.ui.dialogs.ErrorDialogFragment;
+import is.hello.piru.ui.navigation.Navigation;
 import is.hello.piru.ui.screens.base.BaseFragment;
 
 public class DfuProgressFragment extends BaseFragment {
@@ -27,7 +34,7 @@ public class DfuProgressFragment extends BaseFragment {
 
     private TextView statusText;
     private ProgressBar progressBar;
-    private Button controlButton;
+    private ImageButton controlButton;
     private RecyclerView logRecycler;
     private LogAdapter adapter;
 
@@ -47,15 +54,18 @@ public class DfuProgressFragment extends BaseFragment {
 
         this.statusText = (TextView) view.findViewById(R.id.fragment_dfu_progress_status);
         this.progressBar = (ProgressBar) view.findViewById(R.id.fragment_dfu_progress_bar);
-        this.controlButton = (Button) view.findViewById(R.id.fragment_dfu_progress_control);
+        this.controlButton = (ImageButton) view.findViewById(R.id.fragment_dfu_progress_control);
         controlButton.setOnClickListener(this::start);
 
         this.logRecycler = (RecyclerView) view.findViewById(R.id.fragment_dfu_progress_log);
         logRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         logRecycler.setHasFixedSize(true);
+        logRecycler.setItemAnimator(null);
 
         this.adapter = new LogAdapter(getActivity());
         logRecycler.setAdapter(adapter);
+
+        setButtonState(ButtonState.IDLE);
 
         return view;
     }
@@ -84,17 +94,22 @@ public class DfuProgressFragment extends BaseFragment {
     //region Bindings
 
     public void bindProgress(@NonNull PillDfuPresenter.Progress progress) {
-        statusText.setText(progress.getStatus());
-        progressBar.setMax(progress.totalParts);
-        progressBar.setProgress(progress.currentPart);
+        if (progress.isCompleted()) {
+            onDfuCompleted();
+        } else if (progress.isAborted()) {
+            onDfuAborted();
+        } else {
+            statusText.setText(progress.getStatus());
+            progressBar.setMax(progress.totalParts);
+            progressBar.setProgress(progress.currentPart);
+        }
     }
 
     public void presentError(Throwable e) {
         statusText.setText(R.string.title_error);
         progressBar.setProgress(0);
 
-        controlButton.setEnabled(true);
-        controlButton.setText(R.string.action_start);
+        setButtonState(ButtonState.IDLE);
         controlButton.setOnClickListener(this::start);
 
         ErrorDialogFragment dialogFragment = new ErrorDialogFragment.Builder()
@@ -107,6 +122,24 @@ public class DfuProgressFragment extends BaseFragment {
 
     public void appendToLog(@NonNull Pair<Integer, String> entry) {
         adapter.add(entry);
+        logRecycler.post(() -> logRecycler.scrollToPosition(adapter.getItemCount() - 1));
+    }
+
+    //endregion
+
+
+    //region Outcomes
+
+    private void onDfuCompleted() {
+        getNavigation().pushFragment(new DfuCompleteFragment(), Navigation.FLAG_MAKE_HISTORY_ROOT);
+    }
+
+    private void onDfuAborted() {
+        statusText.setText(R.string.dfu_status_aborted);
+        progressBar.setProgress(0);
+
+        setButtonState(ButtonState.IDLE);
+        controlButton.setOnClickListener(this::start);
     }
 
     //endregion
@@ -114,12 +147,28 @@ public class DfuProgressFragment extends BaseFragment {
 
     //region Actions
 
+    private void setButtonState(@NonNull ButtonState state) {
+        controlButton.setContentDescription(getString(state.titleRes));
+
+        Resources resources = getResources();
+        Drawable rawDrawable = ResourcesCompat.getDrawable(resources, state.iconRes, null);
+        Drawable drawable = DrawableCompat.wrap(rawDrawable).mutate();
+        DrawableCompat.setTint(drawable, resources.getColor(R.color.secondary_normal));
+        if (state.enabled) {
+            rawDrawable.setAlpha(0xFF);
+        } else {
+            rawDrawable.setAlpha(0x77);
+        }
+        controlButton.setImageDrawable(rawDrawable);
+        controlButton.setEnabled(state.enabled);
+    }
+
     public void start(@NonNull View sender) {
         if (presenter.isPillInDfuMode()) {
             startDfuService();
         } else {
             statusText.setText(R.string.dfu_status_enabling_dfu_mode);
-            controlButton.setEnabled(false);
+            setButtonState(ButtonState.STARTING_DFU);
 
             subscribe(presenter.enterDfuMode(),
                     ignored -> startDfuService(),
@@ -128,9 +177,8 @@ public class DfuProgressFragment extends BaseFragment {
     }
 
     private void startDfuService() {
-        controlButton.setText(R.string.action_abort);
+        setButtonState(ButtonState.ABORT_DFU);
         controlButton.setOnClickListener(this::abort);
-        controlButton.setEnabled(true);
 
         subscribe(presenter.startDfuService(), ignored -> {}, this::presentError);
     }
@@ -140,4 +188,23 @@ public class DfuProgressFragment extends BaseFragment {
     }
 
     //endregion
+
+
+    enum ButtonState {
+        IDLE(R.string.action_start, R.drawable.action_upload, true),
+        STARTING_DFU(R.string.action_start, R.drawable.action_upload, false),
+        ABORT_DFU(R.string.action_abort, R.drawable.action_stop, true);
+
+        public final @StringRes int titleRes;
+        public final @DrawableRes int iconRes;
+        public final boolean enabled;
+
+        ButtonState(@StringRes int titleRes,
+                    @DrawableRes int iconRes,
+                    boolean enabled) {
+            this.titleRes = titleRes;
+            this.iconRes = iconRes;
+            this.enabled = enabled;
+        }
+    }
 }

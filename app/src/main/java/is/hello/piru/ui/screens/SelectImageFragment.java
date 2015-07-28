@@ -17,6 +17,7 @@ import javax.inject.Inject;
 
 import is.hello.piru.R;
 import is.hello.piru.bluetooth.PillDfuPresenter;
+import is.hello.piru.ui.navigation.Navigation;
 import is.hello.piru.ui.screens.base.BaseFragment;
 import is.hello.piru.ui.util.FileUtils;
 
@@ -53,11 +54,11 @@ public class SelectImageFragment extends BaseFragment {
 
         if (requestCode == REQUEST_CODE_IMAGE && resultCode == Activity.RESULT_OK) {
             Uri imageUri = data.getData();
-            presenter.setImageUri(imageUri);
+            presenter.setFirmwareImage(imageUri);
 
             Log.d(getClass().getSimpleName(), "Picked '" + imageUri + "'");
 
-            getNavigation().pushFragment(new BleIntroFragment());
+            getNavigation().pushFragment(new BleIntroFragment(), Navigation.FLAGS_DEFAULT);
         }
     }
 }
