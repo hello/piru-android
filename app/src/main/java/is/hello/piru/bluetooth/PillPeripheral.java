@@ -137,6 +137,16 @@ public final class PillPeripheral {
                          });
     }
 
+    @NonNull
+    public Observable<PillPeripheral> createBond() {
+        Log.d(getClass().getSimpleName(), "createBond()");
+
+        return peripheral.createBond().map(ignored -> {
+            Log.d(getClass().getSimpleName(), "bond created");
+            return this;
+        });
+    }
+
     public boolean isConnected() {
         return (peripheral.getConnectionStatus() == Peripheral.STATUS_CONNECTED &&
                 service != null);
@@ -165,6 +175,7 @@ public final class PillPeripheral {
 
         byte[] payload = { COMMAND_WIPE_FIRMWARE };
         return writeCommand(CHARACTERISTIC_COMMAND_UUID, Peripheral.WriteType.NO_RESPONSE, payload)
+                .delay(5, TimeUnit.SECONDS)
                 .flatMap(ignored -> {
                     Log.d(getClass().getSimpleName(), "wipeFirmware command written");
                     return disconnect();

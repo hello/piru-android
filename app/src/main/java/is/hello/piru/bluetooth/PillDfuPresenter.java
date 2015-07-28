@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -117,9 +118,17 @@ import rx.Observable;
             return Observable.error(new PeripheralNotFoundError());
         }
 
-        return targetPill.connect()
-                         .flatMap(PillPeripheral::wipeFirmware)
-                         .delay(3, TimeUnit.SECONDS);
+        Observable<PillPeripheral> connect = targetPill.connect()
+                .flatMap(PillPeripheral::wipeFirmware)
+                .delay(10, TimeUnit.SECONDS);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            // The DFU library does not appear to contain the work-around
+            // for createBond() not working after connectGatt on Lollipop.
+            return connect.flatMap(PillPeripheral::createBond);
+        } else {
+            return connect;
+        }
     }
 
     public Observable<ComponentName> startDfuService() {

@@ -47,6 +47,7 @@ public class DfuCompleteFragment extends BaseFragment {
     }
 
     public void exit(@NonNull View sender) {
+        presenter.reset(true);
         getActivity().finish();
     }
 }
