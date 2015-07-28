@@ -23,6 +23,7 @@ import android.widget.TextView;
 import javax.inject.Inject;
 
 import is.hello.piru.R;
+import is.hello.piru.bluetooth.DfuService;
 import is.hello.piru.bluetooth.PillDfuPresenter;
 import is.hello.piru.ui.adapters.LogAdapter;
 import is.hello.piru.ui.dialogs.ErrorDialogFragment;
@@ -93,15 +94,14 @@ public class DfuProgressFragment extends BaseFragment {
 
     //region Bindings
 
-    public void bindProgress(@NonNull PillDfuPresenter.Progress progress) {
-        if (progress.isCompleted()) {
+    public void bindProgress(int progress) {
+        if (progress == DfuService.PROGRESS_COMPLETED) {
             onDfuCompleted();
-        } else if (progress.isAborted()) {
+        } else if (progress == DfuService.PROGRESS_ABORTED) {
             onDfuAborted();
         } else {
-            statusText.setText(progress.getStatus());
-            progressBar.setMax(progress.totalParts);
-            progressBar.setProgress(progress.currentPart);
+            statusText.setText(DfuService.getProgressString(progress));
+            progressBar.setProgress(progress);
         }
     }
 
@@ -170,6 +170,8 @@ public class DfuProgressFragment extends BaseFragment {
             statusText.setText(R.string.dfu_status_enabling_dfu_mode);
             setButtonState(ButtonState.STARTING_DFU);
 
+            appendToLog(Pair.create(Log.INFO, "Entering DFU mode"));
+
             subscribe(presenter.enterDfuMode(),
                     ignored -> startDfuService(),
                     this::presentError);
@@ -177,6 +179,8 @@ public class DfuProgressFragment extends BaseFragment {
     }
 
     private void startDfuService() {
+        appendToLog(Pair.create(Log.INFO, "Starting DFU service"));
+
         setButtonState(ButtonState.ABORT_DFU);
         controlButton.setOnClickListener(this::abort);
 

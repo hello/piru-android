@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.util.Pair;
@@ -25,7 +24,6 @@ import is.hello.buruberi.bluetooth.errors.PeripheralNotFoundError;
 import is.hello.buruberi.bluetooth.stacks.BluetoothStack;
 import is.hello.buruberi.bluetooth.stacks.util.PeripheralCriteria;
 import is.hello.buruberi.util.Rx;
-import is.hello.piru.R;
 import is.hello.piru.ui.util.FileUtils;
 import is.hello.piru.ui.util.PresenterSubject;
 import rx.Observable;
@@ -120,6 +118,9 @@ import rx.Observable;
 
         Observable<PillPeripheral> connect = targetPill.connect()
                 .flatMap(PillPeripheral::wipeFirmware)
+                // Give the Sleep Pill time to restart into the bootloader
+                // before we a) attempt to establish a bond with it;
+                // and b) tell the dfu library to flash it. For sanity's sake.
                 .delay(10, TimeUnit.SECONDS);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -168,19 +169,16 @@ import rx.Observable;
         }).subscribeOn(Rx.mainThreadScheduler());
     }
 
-    public Observable<Progress> dfuProgress() {
+    public Observable<Integer> dfuProgress() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(DfuService.BROADCAST_ERROR);
         filter.addAction(DfuService.BROADCAST_PROGRESS);
-        Progress progress = new Progress();
         return Rx.fromLocalBroadcast(context, filter).flatMap(broadcast -> {
             if (DfuService.BROADCAST_ERROR.equals(broadcast.getAction())) {
                 int errorCode = broadcast.getIntExtra(DfuService.EXTRA_DATA, BluetoothGattError.GATT_STACK_ERROR);
                 return Observable.error(new DfuService.Error(errorCode));
             } else {
-                progress.status = broadcast.getIntExtra(DfuService.EXTRA_DATA, 0);
-                progress.totalParts = broadcast.getIntExtra(DfuService.EXTRA_PARTS_TOTAL, 0);
-                progress.currentPart = broadcast.getIntExtra(DfuService.EXTRA_PART_CURRENT, 0);
+                int progress = broadcast.getIntExtra(DfuService.EXTRA_DATA, 0);
                 return Observable.just(progress);
             }
         });
@@ -214,51 +212,4 @@ import rx.Observable;
     }
 
     //endregion
-
-
-    public static class Progress {
-        public int status;
-        public int totalParts;
-        public int currentPart;
-
-
-        public @StringRes int getStatus() {
-            switch (status) {
-                case DfuService.PROGRESS_CONNECTING:
-                    return R.string.dfu_status_connecting;
-                case DfuService.PROGRESS_STARTING:
-                    return R.string.dfu_status_starting;
-                case DfuService.PROGRESS_ENABLING_DFU_MODE:
-                    return R.string.dfu_status_enabling_dfu_mode;
-                case DfuService.PROGRESS_VALIDATING:
-                    return R.string.dfu_status_validating;
-                case DfuService.PROGRESS_DISCONNECTING:
-                    return R.string.dfu_status_disconnecting;
-                case DfuService.PROGRESS_COMPLETED:
-                    return R.string.dfu_status_completed;
-                case DfuService.PROGRESS_ABORTED:
-                    return R.string.dfu_status_aborted;
-                default:
-                    return R.string.dfu_status_waiting;
-            }
-        }
-
-        public boolean isCompleted() {
-            return (status == DfuService.PROGRESS_COMPLETED);
-        }
-
-        public boolean isAborted() {
-            return (status == DfuService.PROGRESS_ABORTED);
-        }
-
-
-        @Override
-        public String toString() {
-            return "Progress{" +
-                    "status=" + status +
-                    ", totalParts=" + totalParts +
-                    ", currentPart=" + currentPart +
-                    '}';
-        }
-    }
 }

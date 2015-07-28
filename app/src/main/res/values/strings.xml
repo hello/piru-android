@@ -14,11 +14,12 @@
     <string name="dfu_status_waiting">Waiting…</string>
     <string name="dfu_status_connecting">Connecting</string>
     <string name="dfu_status_starting">Starting</string>
-    <string name="dfu_status_enabling_dfu_mode">Enabling dfu mode</string>
+    <string name="dfu_status_enabling_dfu_mode">Entering dfu mode</string>
     <string name="dfu_status_validation">Validating</string>
     <string name="dfu_status_disconnecting">Disconnecting</string>
     <string name="dfu_status_completed">Done</string>
     <string name="dfu_status_aborted">Aborted</string>
+    <string name="dfu_status_uploading">Uploading</string>
     <string name="action_start">Start</string>
     <string name="action_abort">Abort</string>
     <string name="title_success">Success</string>

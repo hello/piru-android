@@ -175,6 +175,10 @@ public final class PillPeripheral {
 
         byte[] payload = { COMMAND_WIPE_FIRMWARE };
         return writeCommand(CHARACTERISTIC_COMMAND_UUID, Peripheral.WriteType.NO_RESPONSE, payload)
+                // There's a race condition inside of the BLE stack where disconnecting
+                // immediately after calling writeCommand(...) will result in the command
+                // not being written to the characteristic. 3 seconds seemed to be sufficient,
+                // but quality of BLE varies a lot, so let's go with 5 to be safe.
                 .delay(5, TimeUnit.SECONDS)
                 .flatMap(ignored -> {
                     Log.d(getClass().getSimpleName(), "wipeFirmware command written");
