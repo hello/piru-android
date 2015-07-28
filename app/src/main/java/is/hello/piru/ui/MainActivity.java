@@ -8,7 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import is.hello.piru.R;
 import is.hello.piru.ui.navigation.Navigation;
-import is.hello.piru.ui.screens.IntroFragment;
+import is.hello.piru.ui.screens.SelectImageFragment;
 
 public class MainActivity extends AppCompatActivity implements Navigation {
     @Override
@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity implements Navigation {
         setContentView(R.layout.activity_main);
 
         if (savedInstanceState == null) {
-            pushFragment(new IntroFragment());
+            pushFragment(new SelectImageFragment());
         }
     }
 

@@ -6,33 +6,36 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.util.Pair;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import is.hello.buruberi.bluetooth.errors.BluetoothGattError;
+import is.hello.buruberi.bluetooth.errors.PeripheralNotFoundError;
 import is.hello.buruberi.bluetooth.stacks.BluetoothStack;
-import is.hello.buruberi.bluetooth.stacks.Peripheral;
-import is.hello.buruberi.bluetooth.stacks.util.AdvertisingData;
 import is.hello.buruberi.bluetooth.stacks.util.PeripheralCriteria;
 import is.hello.buruberi.util.Rx;
+import is.hello.piru.ui.util.FileUtils;
 import rx.Observable;
 import rx.subjects.ReplaySubject;
 
 @Singleton public class PillDfuPresenter {
-    public static final String SERVICE_ID_128_BIT = "23D1BCEA5F782315DEEF121210E10000";
-
     private final Context context;
     private final BluetoothStack bluetoothStack;
     private PendingObservables<String> pending = new PendingObservables<>();
 
-    public final ReplaySubject<List<Peripheral>> sleepPills = ReplaySubject.createWithSize(1);
+    public final ReplaySubject<List<PillPeripheral>> sleepPills = ReplaySubject.createWithSize(1);
     private boolean hasScanned = false;
+    private @Nullable PillPeripheral selectedPeripheral;
+
+    private @Nullable Uri imageUri;
 
 
     //region Lifecycle
@@ -48,13 +51,8 @@ import rx.subjects.ReplaySubject;
 
     //region Scanning
 
-    private Observable<List<Peripheral>> scanForPills() {
-        return pending.bind("scanForPills", () -> {
-            PeripheralCriteria criteria = new PeripheralCriteria();
-            criteria.setDuration(PeripheralCriteria.DEFAULT_DURATION_MS * 2);
-            criteria.addExactMatchPredicate(AdvertisingData.TYPE_LIST_OF_128_BIT_SERVICE_CLASS_UUIDS, SERVICE_ID_128_BIT);
-            return bluetoothStack.discoverPeripherals(criteria);
-        });
+    private Observable<List<PillPeripheral>> scanForPills() {
+        return pending.bind("scanForPills", () -> PillPeripheral.discover(bluetoothStack, new PeripheralCriteria()));
     }
 
     public boolean hasScanned() {
@@ -79,16 +77,45 @@ import rx.subjects.ReplaySubject;
 
     //region Pill Interactions
 
-    public Observable<ComponentName> startDfuService(@NonNull String name, @NonNull String address, @NonNull Uri imageUri) {
+    public void setImageUri(@NonNull Uri imageUri) {
+        this.imageUri = imageUri;
+    }
+
+    public void setSelectedPeripheral(@Nullable PillPeripheral selectedPeripheral) {
+        this.selectedPeripheral = selectedPeripheral;
+    }
+
+    public Observable<Void> enterDfuMode() {
+        if (selectedPeripheral == null) {
+            return Observable.error(new PeripheralNotFoundError());
+        }
+
+        return selectedPeripheral.connect()
+                                 .flatMap(PillPeripheral::wipeFirmware);
+    }
+
+    public Observable<ComponentName> startDfuService() {
         return Observable.<ComponentName>create(subscriber -> {
+            if (imageUri == null) {
+                subscriber.onError(new FileNotFoundException());
+                return;
+            }
+
+            if (selectedPeripheral == null) {
+                subscriber.onError(new PeripheralNotFoundError());
+                return;
+            }
+
             Intent intent = new Intent(context, DfuService.class);
 
-            intent.putExtra(DfuService.EXTRA_DEVICE_NAME, name);
-            intent.putExtra(DfuService.EXTRA_DEVICE_ADDRESS, address);
+            intent.putExtra(DfuService.EXTRA_DEVICE_NAME, selectedPeripheral.getName());
+            intent.putExtra(DfuService.EXTRA_DEVICE_ADDRESS, selectedPeripheral.getAddress());
             intent.putExtra(DfuService.EXTRA_FILE_TYPE, DfuService.TYPE_APPLICATION);
             intent.putExtra(DfuService.EXTRA_FILE_MIME_TYPE, DfuService.MIME_TYPE_OCTET_STREAM);
-            intent.putExtra(DfuService.EXTRA_FILE_URI, imageUri);
             intent.putExtra(DfuService.EXTRA_KEEP_BOND, false);
+
+            String path = FileUtils.getPath(context, imageUri);
+            intent.putExtra(DfuService.EXTRA_FILE_PATH, path);
 
             try {
                 ComponentName componentName = context.startService(intent);

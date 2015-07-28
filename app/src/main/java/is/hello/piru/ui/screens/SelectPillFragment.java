@@ -10,14 +10,14 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import is.hello.buruberi.bluetooth.stacks.Peripheral;
 import is.hello.piru.R;
 import is.hello.piru.bluetooth.PillDfuPresenter;
+import is.hello.piru.bluetooth.PillPeripheral;
 import is.hello.piru.ui.adapters.ArrayRecyclerAdapter;
 import is.hello.piru.ui.adapters.PillsAdapter;
 import is.hello.piru.ui.screens.base.RecyclerFragment;
 
-public class SelectPillFragment extends RecyclerFragment implements ArrayRecyclerAdapter.OnItemClickedListener<Peripheral> {
+public class SelectPillFragment extends RecyclerFragment implements ArrayRecyclerAdapter.OnItemClickedListener<PillPeripheral> {
     @Inject PillDfuPresenter presenter;
 
     private PillsAdapter adapter;
@@ -68,7 +68,7 @@ public class SelectPillFragment extends RecyclerFragment implements ArrayRecycle
         presenter.update();
     }
 
-    public void bindPills(@NonNull List<Peripheral> pills) {
+    public void bindPills(@NonNull List<PillPeripheral> pills) {
         setBusy(false);
 
         adapter.clear();
@@ -82,8 +82,10 @@ public class SelectPillFragment extends RecyclerFragment implements ArrayRecycle
     }
 
     @Override
-    public void onItemClicked(int position, Peripheral pill) {
-        DfuProgressFragment fragment = DfuProgressFragment.newInstance(pill);
+    public void onItemClicked(int position, PillPeripheral pill) {
+        presenter.setSelectedPeripheral(pill);
+
+        DfuProgressFragment fragment = new DfuProgressFragment();
         getNavigation().pushFragment(fragment);
     }
 

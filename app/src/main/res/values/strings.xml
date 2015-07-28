@@ -7,4 +7,5 @@
     <string name="title_intro">Activate Sleep Pill Bluetooth Low Energy</string>
     <string name="info_intro">To begin, you must activate Bluetooth Low Energy mode on your Sleep Pill. To do this, place a magnet just above the hinge on the side of your Sleep Pill that says “Hello” for a few seconds.\n\nPress next after you‘ve done this.</string>
     <string name="message_no_pills">No Pills Found</string>
+    <string name="title_select">Select</string>
 </resources>

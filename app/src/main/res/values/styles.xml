@@ -4,7 +4,7 @@
         <item name="android:windowBackground">@color/background</item>
 
         <item name="colorAccent">@color/secondary_dark</item>
-        <item name="colorButtonNormal">@color/secondary_dark</item>
+        <item name="colorButtonNormal">@color/primary_dark</item>
 
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>

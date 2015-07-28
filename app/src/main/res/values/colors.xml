@@ -2,9 +2,9 @@
 <resources>
     <color name="background">#ffffff</color>
 
-    <color name="primary">#FF5722</color>
-    <color name="primary_dark">#BF360C</color>
+    <color name="primary">#3F51B5</color>
+    <color name="primary_dark">#303F9F</color>
 
-    <color name="secondary">#03A9F4</color>
-    <color name="secondary_dark">#01579B</color>
+    <color name="secondary">#00BCD4</color>
+    <color name="secondary_dark">#0097A7</color>
 </resources>

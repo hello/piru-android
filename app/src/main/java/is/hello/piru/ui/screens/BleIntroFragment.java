@@ -10,7 +10,7 @@ import android.widget.Button;
 import is.hello.piru.R;
 import is.hello.piru.ui.screens.base.BaseFragment;
 
-public class IntroFragment extends BaseFragment {
+public class BleIntroFragment extends BaseFragment {
     @Override
     protected boolean wantsInjection() {
         return false;

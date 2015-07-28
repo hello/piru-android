@@ -7,10 +7,12 @@ import dagger.Module;
 import dagger.Provides;
 import is.hello.piru.bluetooth.BluetoothModule;
 import is.hello.piru.ui.screens.DfuProgressFragment;
+import is.hello.piru.ui.screens.SelectImageFragment;
 import is.hello.piru.ui.screens.SelectPillFragment;
 
 @Module(includes = {BluetoothModule.class},
         injects = {
+                SelectImageFragment.class,
                 SelectPillFragment.class,
                 DfuProgressFragment.class,
         })

@@ -8,10 +8,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import is.hello.buruberi.bluetooth.stacks.Peripheral;
 import is.hello.piru.R;
+import is.hello.piru.bluetooth.PillPeripheral;
 
-public class PillsAdapter extends ArrayRecyclerAdapter<Peripheral, PillsAdapter.ViewHolder> {
+public class PillsAdapter extends ArrayRecyclerAdapter<PillPeripheral, PillsAdapter.ViewHolder> {
     private final LayoutInflater inflater;
 
     public PillsAdapter(@NonNull Context context) {
@@ -26,9 +26,9 @@ public class PillsAdapter extends ArrayRecyclerAdapter<Peripheral, PillsAdapter.
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Peripheral pill = getItem(position);
+        PillPeripheral pill = getItem(position);
         holder.nameText.setText(pill.getName());
-        holder.addressText.setText(pill.getAddress());
+        holder.addressText.setText(pill.getAddress() + " – " + pill.getScanTimeRssi());
     }
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
