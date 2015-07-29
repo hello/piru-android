@@ -31,6 +31,22 @@ android {
         versionCode generateVersionCode()
         versionName "0.0.1"
     }
+    signingConfigs {
+        debug {
+            def keyStore = file("../../Hello-Android-Internal.keystore")
+            if (keyStore.exists()) {
+                storeFile file("../../Hello-Android-Internal.keystore")
+            } else {
+                logger.warn("Could not find internal keystore, ignoring.")
+            }
+        }
+        release {
+            storeFile file("../../Hello-Android-Release.keystore")
+            storePassword "hellogoodbye"
+            keyAlias "suripu"
+            keyPassword "hellogoodbye"
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
