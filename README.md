@@ -16,6 +16,6 @@ Prerequisites
 Building
 ========
 
-Place the `.keystore` files into the same directory as your local copy of the `suripu-android` repository.
+Place the `.keystore` files into the same directory as your local copy of the `piru-android` repository.
 
 If you're building the app on a platform other than OS X, you will need to define JAVA_HOME in order for the project to find your installation of the JDK 8.
