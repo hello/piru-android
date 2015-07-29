@@ -11,8 +11,8 @@ import java.util.concurrent.TimeUnit;
 
 import is.hello.buruberi.bluetooth.errors.PeripheralConnectionError;
 import is.hello.buruberi.bluetooth.stacks.BluetoothStack;
+import is.hello.buruberi.bluetooth.stacks.GattPeripheral;
 import is.hello.buruberi.bluetooth.stacks.OperationTimeout;
-import is.hello.buruberi.bluetooth.stacks.Peripheral;
 import is.hello.buruberi.bluetooth.stacks.PeripheralService;
 import is.hello.buruberi.bluetooth.stacks.util.AdvertisingData;
 import is.hello.buruberi.bluetooth.stacks.util.Bytes;
@@ -35,7 +35,7 @@ public final class PillPeripheral {
 
     //region Fields
 
-    private final Peripheral peripheral;
+    private final GattPeripheral gattPeripheral;
     private final boolean inDfuMode;
     private PeripheralService service;
 
@@ -56,17 +56,17 @@ public final class PillPeripheral {
         return bluetoothStack.discoverPeripherals(criteria)
                              .map(peripherals -> {
                                  List<PillPeripheral> pillPeripherals = new ArrayList<>();
-                                 for (Peripheral peripheral : peripherals) {
+                                 for (GattPeripheral peripheral : peripherals) {
                                      pillPeripherals.add(new PillPeripheral(peripheral));
                                  }
                                  return pillPeripherals;
                              });
     }
 
-    PillPeripheral(@NonNull Peripheral peripheral) {
-        this.peripheral = peripheral;
+    PillPeripheral(@NonNull GattPeripheral gattPeripheral) {
+        this.gattPeripheral = gattPeripheral;
 
-        AdvertisingData advertisingData = peripheral.getAdvertisingData();
+        AdvertisingData advertisingData = gattPeripheral.getAdvertisingData();
         this.inDfuMode = advertisingData.anyRecordMatches(AdvertisingData.TYPE_INCOMPLETE_LIST_OF_128_BIT_SERVICE_CLASS_UUIDS,
                 b -> Arrays.equals(DFU_ADVERTISEMENT_SERVICE_128_BIT, b));
     }
@@ -81,15 +81,15 @@ public final class PillPeripheral {
     }
 
     public int getScanTimeRssi() {
-        return peripheral.getScanTimeRssi();
+        return gattPeripheral.getScanTimeRssi();
     }
 
     public String getAddress() {
-        return peripheral.getAddress();
+        return gattPeripheral.getAddress();
     }
 
     public String getName() {
-        return peripheral.getName();
+        return gattPeripheral.getName();
     }
 
     //endregion
@@ -99,7 +99,7 @@ public final class PillPeripheral {
 
     @NonNull
     private OperationTimeout createOperationTimeout(@NonNull String name) {
-        return peripheral.createOperationTimeout(name, 30, TimeUnit.SECONDS);
+        return gattPeripheral.createOperationTimeout(name, 30, TimeUnit.SECONDS);
     }
 
     //endregion
@@ -116,7 +116,7 @@ public final class PillPeripheral {
         }
 
         OperationTimeout operationTimeout = createOperationTimeout("Connect");
-        return peripheral.connect(operationTimeout)
+        return gattPeripheral.connect(operationTimeout)
                          .flatMap(connectedPeripheral -> {
                              Log.d(getClass().getSimpleName(), "discoverService(" + SERVICE + ")");
                              return connectedPeripheral.discoverService(SERVICE, operationTimeout);
@@ -130,7 +130,7 @@ public final class PillPeripheral {
 
     @NonNull
     public Observable<PillPeripheral> disconnect() {
-        return peripheral.disconnect()
+        return gattPeripheral.disconnect()
                          .map(ignored -> {
                              this.service = null;
                              return this;
@@ -141,14 +141,14 @@ public final class PillPeripheral {
     public Observable<PillPeripheral> createBond() {
         Log.d(getClass().getSimpleName(), "createBond()");
 
-        return peripheral.createBond().map(ignored -> {
+        return gattPeripheral.createBond().map(ignored -> {
             Log.d(getClass().getSimpleName(), "bond created");
             return this;
         });
     }
 
     public boolean isConnected() {
-        return (peripheral.getConnectionStatus() == Peripheral.STATUS_CONNECTED &&
+        return (gattPeripheral.getConnectionStatus() == GattPeripheral.STATUS_CONNECTED &&
                 service != null);
     }
 
@@ -159,7 +159,7 @@ public final class PillPeripheral {
 
     @NonNull
     private Observable<Void> writeCommand(@NonNull UUID identifier,
-                                          @NonNull Peripheral.WriteType writeType,
+                                          @NonNull GattPeripheral.WriteType writeType,
                                           @NonNull byte[] payload) {
         Log.d(getClass().getSimpleName(), "writeCommand(" + identifier + ", " + writeType + ", " + Arrays.toString(payload) + ")");
 
@@ -167,14 +167,14 @@ public final class PillPeripheral {
             return Observable.error(new PeripheralConnectionError("writeCommand(...) requires a connection"));
         }
 
-        return peripheral.writeCommand(service, identifier, writeType, payload, createOperationTimeout("Write Command"));
+        return gattPeripheral.writeCommand(service, identifier, writeType, payload, createOperationTimeout("Write Command"));
     }
 
     public Observable<PillPeripheral> wipeFirmware() {
         Log.d(getClass().getSimpleName(), "wipeFirmware()");
 
         byte[] payload = { COMMAND_WIPE_FIRMWARE };
-        return writeCommand(CHARACTERISTIC_COMMAND_UUID, Peripheral.WriteType.NO_RESPONSE, payload)
+        return writeCommand(CHARACTERISTIC_COMMAND_UUID, GattPeripheral.WriteType.NO_RESPONSE, payload)
                 // There's a race condition inside of the BLE stack where disconnecting
                 // immediately after calling writeCommand(...) will result in the command
                 // not being written to the characteristic. 3 seconds seemed to be sufficient,
