@@ -12,11 +12,12 @@ import dagger.Module;
 import dagger.Provides;
 import is.hello.piru.api.services.AdminService;
 import is.hello.piru.api.services.CoreService;
+import is.hello.piru.api.services.SuripuApi;
 import retrofit.RestAdapter;
 import retrofit.converter.GsonConverter;
 
 @Module(complete = false,
-        injects = {ApiPresenter.class})
+        injects = {SuripuApi.class})
 public class ApiModule {
     @Singleton @Provides Gson provideGson() {
         return new GsonBuilder()
@@ -24,12 +25,7 @@ public class ApiModule {
                 .create();
     }
 
-    @Singleton @Provides SuripuEndpoints provideSuripuEndpoints() {
-        return new SuripuEndpoints();
-    }
-
-    @Singleton @Provides
-    SessionStore provideSession(@NonNull Context context) {
+    @Singleton @Provides SessionStore provideSession(@NonNull Context context) {
         return new SessionStore(context);
     }
 
@@ -46,16 +42,14 @@ public class ApiModule {
                 .setConverter(new GsonConverter(gson));
     }
 
-    @Singleton @Provides AdminService provideAdminService(@NonNull RestAdapter.Builder builder,
-                                                          @NonNull SuripuEndpoints endpoints) {
-        return builder.setEndpoint(endpoints.getAdminEndpoint())
+    @Singleton @Provides AdminService provideAdminService(@NonNull RestAdapter.Builder builder) {
+        return builder.setEndpoint(AdminService.ENDPOINT)
                       .build()
                       .create(AdminService.class);
     }
 
-    @Singleton @Provides CoreService provideCoreService(@NonNull RestAdapter.Builder builder,
-                                                        @NonNull SuripuEndpoints endpoints) {
-        return builder.setEndpoint(endpoints.getCoreEndpoint())
+    @Singleton @Provides CoreService provideCoreService(@NonNull RestAdapter.Builder builder) {
+        return builder.setEndpoint(CoreService.ENDPOINT)
                       .build()
                       .create(CoreService.class);
     }

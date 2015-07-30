@@ -8,25 +8,27 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import is.hello.piru.api.SuripuEndpoints;
 import retrofit.mime.TypedOutput;
 
 public class OAuthCredentials implements TypedOutput {
-    public final SuripuEndpoints endpoints;
+    public static final String CLIENT_ID = "nonsensical-fantastic-android-pill-flasher";
+    public static final String SHARED_SECRET = "13708312-3705-11e5-b47a-2cf0ee0ea64c";
+
+
     public final String username;
     public final String password;
     private final ByteArrayOutputStream outputStream;
 
-    public OAuthCredentials(@NonNull SuripuEndpoints endpoints,
-                            @NonNull String username,
+    public OAuthCredentials(@NonNull String username,
                             @NonNull String password) {
-        if (TextUtils.isEmpty(username))
+        if (TextUtils.isEmpty(username)) {
             throw new IllegalArgumentException("username cannot be omitted");
+        }
 
-        if (TextUtils.isEmpty(password))
+        if (TextUtils.isEmpty(password)) {
             throw new IllegalArgumentException("password cannot be omitted");
+        }
 
-        this.endpoints = endpoints;
         this.username = username;
         this.password = password;
         this.outputStream = new ByteArrayOutputStream();
@@ -49,8 +51,8 @@ public class OAuthCredentials implements TypedOutput {
 
     private void generate() {
         addField("grant_type", "password");
-        addField("client_id", endpoints.getClientId());
-        addField("client_secret", endpoints.getClientSecret());
+        addField("client_id", CLIENT_ID);
+        addField("client_secret", SHARED_SECRET);
         addField("username", username);
         addField("password", password);
     }
