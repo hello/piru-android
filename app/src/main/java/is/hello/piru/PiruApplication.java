@@ -3,6 +3,7 @@ package is.hello.piru;
 import android.app.Application;
 
 import dagger.ObjectGraph;
+import is.hello.piru.api.ApiModule;
 import is.hello.piru.bluetooth.BluetoothModule;
 
 public class PiruApplication extends Application {
@@ -21,6 +22,7 @@ public class PiruApplication extends Application {
         PiruApplication.instance = this;
 
         this.graph = ObjectGraph.create(
+                new ApiModule(),
                 new BluetoothModule(),
                 new PiruAppModule(this)
         );

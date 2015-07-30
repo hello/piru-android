@@ -5,13 +5,14 @@ import android.support.annotation.NonNull;
 
 import dagger.Module;
 import dagger.Provides;
+import is.hello.piru.api.ApiModule;
 import is.hello.piru.bluetooth.BluetoothModule;
 import is.hello.piru.ui.screens.DfuCompleteFragment;
 import is.hello.piru.ui.screens.DfuProgressFragment;
 import is.hello.piru.ui.screens.SelectImageFragment;
 import is.hello.piru.ui.screens.SelectPillFragment;
 
-@Module(includes = {BluetoothModule.class},
+@Module(includes = {ApiModule.class, BluetoothModule.class},
         injects = {
                 SelectImageFragment.class,
                 SelectPillFragment.class,
