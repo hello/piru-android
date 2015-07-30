@@ -7,7 +7,7 @@
     android:background="?attr/selectableItemBackground">
 
     <ImageView
-        android:id="@+id/item_pill_chevron"
+        android:id="@+id/item_with_detail_chevron"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
@@ -17,19 +17,19 @@
         android:importantForAccessibility="no" />
 
     <TextView
-        android:id="@+id/item_pill_name"
+        android:id="@+id/item_with_detail_big"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toStartOf="@id/item_pill_chevron"
+        android:layout_toStartOf="@id/item_with_detail_chevron"
         android:layout_marginBottom="@dimen/gap_inter"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
 
     <TextView
-        android:id="@+id/item_pill_address"
+        android:id="@+id/item_with_detail_small"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toStartOf="@id/item_pill_chevron"
-        android:layout_below="@id/item_pill_name"
+        android:layout_toStartOf="@id/item_with_detail_chevron"
+        android:layout_below="@id/item_with_detail_big"
         android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
 
 </RelativeLayout>

@@ -2,7 +2,7 @@ package is.hello.piru.api.services;
 
 import android.support.annotation.NonNull;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import is.hello.piru.api.model.FirmwareType;
 import is.hello.piru.api.model.FirmwareVersion;
@@ -14,9 +14,8 @@ public interface AdminService {
     String ENDPOINT = "https://admin-api.sense.is";
 
     @GET("/v1/download/{type}/firmware/stable")
-    Observable<List<FirmwareVersion>> getStable(@NonNull @Path("type") FirmwareType type);
+    Observable<ArrayList<FirmwareVersion>> getStable(@NonNull @Path("type") FirmwareType type);
 
     @GET("/v1/download/{type}/firmware")
-    Observable<List<FirmwareVersion>> getUnstable(@NonNull @Path("type") FirmwareType type);
-
+    Observable<ArrayList<FirmwareVersion>> getUnstable(@NonNull @Path("type") FirmwareType type);
 }

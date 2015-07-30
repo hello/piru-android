@@ -11,9 +11,11 @@ import is.hello.piru.ui.screens.DfuCompleteFragment;
 import is.hello.piru.ui.screens.DfuProgressFragment;
 import is.hello.piru.ui.screens.SelectImageFragment;
 import is.hello.piru.ui.screens.SelectPillFragment;
+import is.hello.piru.ui.screens.SignInFragment;
 
 @Module(includes = {ApiModule.class, BluetoothModule.class},
         injects = {
+                SignInFragment.class,
                 SelectImageFragment.class,
                 SelectPillFragment.class,
                 DfuProgressFragment.class,

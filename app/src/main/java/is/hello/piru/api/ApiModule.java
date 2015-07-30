@@ -17,7 +17,7 @@ import retrofit.RestAdapter;
 import retrofit.converter.GsonConverter;
 
 @Module(complete = false,
-        injects = {SuripuApi.class})
+        injects = {SuripuApi.class, FirmwarePresenter.class})
 public class ApiModule {
     @Singleton @Provides Gson provideGson() {
         return new GsonBuilder()

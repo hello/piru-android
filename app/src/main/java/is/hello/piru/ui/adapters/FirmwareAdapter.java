@@ -8,13 +8,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.text.DateFormat;
+import java.util.Date;
+
 import is.hello.piru.R;
-import is.hello.piru.bluetooth.PillPeripheral;
+import is.hello.piru.api.model.FirmwareVersion;
 
-public class PillsAdapter extends ArrayRecyclerAdapter<PillPeripheral, PillsAdapter.ViewHolder> {
+public class FirmwareAdapter extends ArrayRecyclerAdapter<FirmwareVersion, FirmwareAdapter.ViewHolder> {
     private final LayoutInflater inflater;
+    private final DateFormat dateFormat = DateFormat.getDateTimeInstance();
 
-    public PillsAdapter(@NonNull Context context) {
+    public FirmwareAdapter(@NonNull Context context) {
         this.inflater = LayoutInflater.from(context);
     }
 
@@ -26,24 +30,23 @@ public class PillsAdapter extends ArrayRecyclerAdapter<PillPeripheral, PillsAdap
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        PillPeripheral pill = getItem(position);
-        holder.nameText.setText(pill.getName());
-        holder.addressText.setText(pill.getAddress() + " – " + pill.getScanTimeRssi());
+        FirmwareVersion version = getItem(position);
+        holder.nameText.setText(version.getName());
+        holder.dateText.setText(dateFormat.format(new Date(version.getCreatedAt())));
     }
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final TextView nameText;
-        final TextView addressText;
+        final TextView dateText;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
 
             this.nameText = (TextView) itemView.findViewById(R.id.item_with_detail_big);
-            this.addressText = (TextView) itemView.findViewById(R.id.item_with_detail_small);
+            this.dateText = (TextView) itemView.findViewById(R.id.item_with_detail_small);
 
             itemView.setOnClickListener(this);
         }
-
 
         @Override
         public void onClick(View ignored) {

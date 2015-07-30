@@ -2,7 +2,7 @@ package is.hello.piru.api.services;
 
 import android.support.annotation.NonNull;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -45,7 +45,7 @@ import rx.Observable;
 
     //region Firmware Versions
 
-    public Observable<List<FirmwareVersion>> getStable(@NonNull FirmwareType type) {
+    public Observable<ArrayList<FirmwareVersion>> getStable(@NonNull FirmwareType type) {
         if (!hasSession()) {
             return Observable.error(new IllegalStateException("Cannot access firmware versions without session"));
         }
@@ -53,7 +53,7 @@ import rx.Observable;
         return adminService.getStable(type);
     }
 
-    public Observable<List<FirmwareVersion>> getUnstable(@NonNull FirmwareType type) {
+    public Observable<ArrayList<FirmwareVersion>> getUnstable(@NonNull FirmwareType type) {
         if (!hasSession()) {
             return Observable.error(new IllegalStateException("Cannot access firmware versions without session"));
         }
