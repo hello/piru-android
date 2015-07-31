@@ -11,6 +11,7 @@ import java.util.List;
 public abstract class ArrayRecyclerAdapter<T, VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
     private final List<T> storage;
     private @Nullable OnItemClickedListener<T> onItemClickedListener;
+    private @Nullable OnItemLongClickedListener<T> onItemLongClickedListener;
 
     protected ArrayRecyclerAdapter(@NonNull List<T> storage) {
         this.storage = storage;
@@ -95,6 +96,23 @@ public abstract class ArrayRecyclerAdapter<T, VH extends RecyclerView.ViewHolder
 
     public interface OnItemClickedListener<T> {
         void onItemClicked(int position, T item);
+    }
+
+    public void setOnItemLongClickedListener(@Nullable OnItemLongClickedListener<T> onItemLongClickedListener) {
+        this.onItemLongClickedListener = onItemLongClickedListener;
+    }
+
+    protected boolean dispatchItemLongClicked(int position) {
+        if (onItemLongClickedListener != null) {
+            T item = getItem(position);
+            return onItemLongClickedListener.onItemLongClicked(position, item);
+        } else {
+            return false;
+        }
+    }
+
+    public interface OnItemLongClickedListener<T> {
+        boolean onItemLongClicked(int position, T item);
     }
 
     //endregion

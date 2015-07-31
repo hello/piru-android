@@ -34,7 +34,7 @@ public class FirmwareVersionAdapter extends ArrayRecyclerAdapter<FirmwareVersion
         holder.dateText.setText(dateFormat.format(version.getCreatedAt()));
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         final TextView nameText;
         final TextView dateText;
 
@@ -45,11 +45,17 @@ public class FirmwareVersionAdapter extends ArrayRecyclerAdapter<FirmwareVersion
             this.dateText = (TextView) itemView.findViewById(R.id.item_with_detail_small);
 
             itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
         }
 
         @Override
         public void onClick(View ignored) {
             dispatchItemClicked(getAdapterPosition());
+        }
+
+        @Override
+        public boolean onLongClick(View ignored) {
+            return dispatchItemLongClicked(getAdapterPosition());
         }
     }
 }

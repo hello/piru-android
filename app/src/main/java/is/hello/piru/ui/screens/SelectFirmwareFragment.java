@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -30,7 +31,7 @@ import is.hello.piru.ui.navigation.Navigation;
 import is.hello.piru.ui.screens.base.RecyclerFragment;
 import is.hello.piru.ui.util.FileUtils;
 
-public class SelectFirmwareFragment extends RecyclerFragment implements ArrayRecyclerAdapter.OnItemClickedListener<FirmwareVersion> {
+public class SelectFirmwareFragment extends RecyclerFragment implements ArrayRecyclerAdapter.OnItemClickedListener<FirmwareVersion>,ArrayRecyclerAdapter.OnItemLongClickedListener<FirmwareVersion> {
     private static final int REQUEST_CODE_IMAGE = 0x01;
     private static final int REQUEST_CODE_DOWNLOAD = 0x02;
 
@@ -62,6 +63,7 @@ public class SelectFirmwareFragment extends RecyclerFragment implements ArrayRec
 
         this.adapter = new FirmwareVersionAdapter(getActivity());
         adapter.setOnItemClickedListener(this);
+        adapter.setOnItemLongClickedListener(this);
         recyclerView.setAdapter(adapter);
     }
 
@@ -161,6 +163,13 @@ public class SelectFirmwareFragment extends RecyclerFragment implements ArrayRec
         DownloadDialogFragment downloadDialogFragment = DownloadDialogFragment.newInstance(item);
         downloadDialogFragment.setTargetFragment(this, REQUEST_CODE_DOWNLOAD);
         downloadDialogFragment.show(getFragmentManager(), DownloadDialogFragment.TAG);
+    }
+
+    @Override
+    public boolean onItemLongClicked(int position, FirmwareVersion item) {
+        Toast.makeText(getActivity().getApplicationContext(),
+                item.getName(), Toast.LENGTH_SHORT).show();
+        return true;
     }
 
     //endregion
