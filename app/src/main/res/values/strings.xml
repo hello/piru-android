@@ -14,7 +14,7 @@
     <string name="dfu_status_waiting">Waiting…</string>
     <string name="dfu_status_connecting">Connecting</string>
     <string name="dfu_status_starting">Starting</string>
-    <string name="dfu_status_enabling_dfu_mode">Entering dfu mode</string>
+    <string name="dfu_status_enabling_dfu_mode">Wiping Sleep Pill firmware…</string>
     <string name="dfu_status_validation">Validating</string>
     <string name="dfu_status_disconnecting">Disconnecting</string>
     <string name="dfu_status_completed">Done</string>
@@ -38,4 +38,5 @@
     <string name="title_select_firmware">Select Firmware</string>
     <string name="title_filter_type_stable">Stable Versions</string>
     <string name="title_filter_type_unstable">Unstable Versions</string>
+    <string name="title_dfu_complete">Done</string>
 </resources>

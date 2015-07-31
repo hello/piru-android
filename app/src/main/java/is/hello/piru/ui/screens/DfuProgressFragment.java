@@ -170,7 +170,7 @@ public class DfuProgressFragment extends BaseFragment {
             statusText.setText(R.string.dfu_status_enabling_dfu_mode);
             setButtonState(ButtonState.STARTING_DFU);
 
-            appendToLog(Pair.create(Log.INFO, "Entering DFU mode"));
+            appendToLog(Pair.create(Log.INFO, "Wiping current Sleep Pill firmware (this will take a minute or so)"));
 
             subscribe(presenter.enterDfuMode(),
                     ignored -> startDfuService(),

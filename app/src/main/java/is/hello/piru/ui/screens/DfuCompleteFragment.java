@@ -1,5 +1,6 @@
 package is.hello.piru.ui.screens;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -35,6 +36,10 @@ public class DfuCompleteFragment extends BaseFragment {
         return view;
     }
 
+    @Override
+    public CharSequence getNavigationTitle(@NonNull Context context) {
+        return context.getString(R.string.title_dfu_complete);
+    }
 
     public void flashAnother(@NonNull View sender) {
         presenter.reset(false);
