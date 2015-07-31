@@ -11,7 +11,7 @@ import retrofit.http.Path;
 import rx.Observable;
 
 public interface AdminService {
-    String ENDPOINT = "https://admin-api.sense.is";
+    String ENDPOINT = "https://admin-api.hello.is";
 
     @GET("/v1/download/{type}/firmware/stable")
     Observable<ArrayList<FirmwareVersion>> getStable(@NonNull @Path("type") FirmwareType type);

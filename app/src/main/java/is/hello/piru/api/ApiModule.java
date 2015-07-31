@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.squareup.okhttp.OkHttpClient;
 
 import javax.inject.Singleton;
 
@@ -14,6 +15,7 @@ import is.hello.piru.api.services.AdminService;
 import is.hello.piru.api.services.CoreService;
 import is.hello.piru.api.services.SuripuApi;
 import retrofit.RestAdapter;
+import retrofit.client.OkClient;
 import retrofit.converter.GsonConverter;
 
 @Module(complete = false,
@@ -25,11 +27,16 @@ public class ApiModule {
                 .create();
     }
 
+    @Singleton @Provides OkHttpClient provideOkHttpClient() {
+        return new OkHttpClient();
+    }
+
     @Singleton @Provides SessionStore provideSession(@NonNull Context context) {
         return new SessionStore(context);
     }
 
     @Provides RestAdapter.Builder provideConfiguredRestAdapterBuilder(@NonNull Gson gson,
+                                                                      @NonNull OkHttpClient httpClient,
                                                                       @NonNull SessionStore sessionStore) {
         return new RestAdapter.Builder()
                 .setRequestInterceptor(request -> {
@@ -39,7 +46,8 @@ public class ApiModule {
                     }
                 })
                 .setLogLevel(RestAdapter.LogLevel.FULL)
-                .setConverter(new GsonConverter(gson));
+                .setConverter(new GsonConverter(gson))
+                .setClient(new OkClient(httpClient));
     }
 
     @Singleton @Provides AdminService provideAdminService(@NonNull RestAdapter.Builder builder) {

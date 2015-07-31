@@ -8,18 +8,34 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 
+import javax.inject.Inject;
+
 import is.hello.piru.R;
+import is.hello.piru.api.SessionStore;
 import is.hello.piru.ui.navigation.Navigation;
 import is.hello.piru.ui.screens.SelectImageFragment;
+import is.hello.piru.ui.screens.SignInFragment;
+
+import static is.hello.piru.PiruApplication.inject;
 
 public class MainActivity extends AppCompatActivity implements Navigation, FragmentManager.OnBackStackChangedListener {
+    @Inject SessionStore sessionStore;
+
+    public MainActivity() {
+        inject(this);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         getSupportFragmentManager().addOnBackStackChangedListener(this);
-        pushFragment(new SelectImageFragment(), Navigation.FLAG_MAKE_HISTORY_ROOT);
+        if (sessionStore.hasSession()) {
+            pushFragment(new SelectImageFragment(), Navigation.FLAG_MAKE_HISTORY_ROOT);
+        } else {
+            pushFragment(new SignInFragment(), Navigation.FLAG_MAKE_HISTORY_ROOT);
+        }
 
         updateUpButton();
     }

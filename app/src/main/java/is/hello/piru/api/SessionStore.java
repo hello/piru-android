@@ -38,7 +38,7 @@ public class SessionStore {
     }
 
     public @Nullable String getAuthorizationHeader() {
-        return store.getString(KEY_ACCESS_TOKEN, null);
+        return "Bearer " + store.getString(KEY_ACCESS_TOKEN, null);
     }
 
     public @Nullable String getAccountId() {

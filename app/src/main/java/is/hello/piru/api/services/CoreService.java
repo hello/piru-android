@@ -9,8 +9,8 @@ import retrofit.http.POST;
 import rx.Observable;
 
 public interface CoreService {
-    String ENDPOINT = "https://api.sense.is";
+    String ENDPOINT = "https://api.hello.is";
 
-    @POST("/oauth2/token")
+    @POST("/v1/oauth2/token")
     Observable<OAuthSession> authorize(@NonNull @Body OAuthCredentials request);
 }

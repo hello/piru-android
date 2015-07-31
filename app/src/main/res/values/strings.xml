@@ -27,4 +27,11 @@
     <string name="action_flash_another">Flash Another</string>
     <string name="action_choose_new_image">Choose New Image</string>
     <string name="action_exit">Exit</string>
+    <string name="action_show_unstable">Show Unstable</string>
+    <string name="action_show_stable">Show Stable</string>
+    <string name="action_choose_file">Choose File…</string>
+    <string name="action_sign_in">Sign In</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="error_missing_email_or_password">Email and password are required.</string>
 </resources>

@@ -7,6 +7,7 @@ import dagger.Module;
 import dagger.Provides;
 import is.hello.piru.api.ApiModule;
 import is.hello.piru.bluetooth.BluetoothModule;
+import is.hello.piru.ui.MainActivity;
 import is.hello.piru.ui.screens.DfuCompleteFragment;
 import is.hello.piru.ui.screens.DfuProgressFragment;
 import is.hello.piru.ui.screens.SelectImageFragment;
@@ -15,6 +16,7 @@ import is.hello.piru.ui.screens.SignInFragment;
 
 @Module(includes = {ApiModule.class, BluetoothModule.class},
         injects = {
+                MainActivity.class,
                 SignInFragment.class,
                 SelectImageFragment.class,
                 SelectPillFragment.class,
