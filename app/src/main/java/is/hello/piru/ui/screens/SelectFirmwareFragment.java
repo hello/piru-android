@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,24 +17,27 @@ import java.util.ArrayList;
 
 import javax.inject.Inject;
 
+import is.hello.piru.R;
 import is.hello.piru.api.FirmwarePresenter;
 import is.hello.piru.api.model.FirmwareVersion;
 import is.hello.piru.bluetooth.PillDfuPresenter;
 import is.hello.piru.ui.adapters.ArrayRecyclerAdapter;
-import is.hello.piru.ui.adapters.FirmwareAdapter;
+import is.hello.piru.ui.adapters.FirmwareVersionAdapter;
 import is.hello.piru.ui.adapters.HorizontalDividerDecoration;
+import is.hello.piru.ui.dialogs.DownloadDialogFragment;
 import is.hello.piru.ui.dialogs.ErrorDialogFragment;
 import is.hello.piru.ui.navigation.Navigation;
 import is.hello.piru.ui.screens.base.RecyclerFragment;
 import is.hello.piru.ui.util.FileUtils;
 
-public class SelectImageFragment extends RecyclerFragment implements ArrayRecyclerAdapter.OnItemClickedListener<FirmwareVersion> {
+public class SelectFirmwareFragment extends RecyclerFragment implements ArrayRecyclerAdapter.OnItemClickedListener<FirmwareVersion> {
     private static final int REQUEST_CODE_IMAGE = 0x01;
+    private static final int REQUEST_CODE_DOWNLOAD = 0x02;
 
     @Inject FirmwarePresenter firmwarePresenter;
     @Inject PillDfuPresenter pillDfuPresenter;
 
-    private FirmwareAdapter adapter;
+    private FirmwareVersionAdapter adapter;
 
     //region Lifecycle
 
@@ -45,10 +47,12 @@ public class SelectImageFragment extends RecyclerFragment implements ArrayRecycl
 
         if (savedInstanceState != null) {
             firmwarePresenter.restoreInstanceState(savedInstanceState);
+            invalidateTitles();
         } else {
-            firmwarePresenter.setType(FirmwarePresenter.Type.UNSTABLE);
+            firmwarePresenter.setFilterType(FirmwarePresenter.FilterType.UNSTABLE);
         }
 
+        setHasOptionsMenu(true);
         setRetainInstance(true);
     }
 
@@ -56,7 +60,7 @@ public class SelectImageFragment extends RecyclerFragment implements ArrayRecycl
     protected void onConfigureRecycler(@NonNull RecyclerView recyclerView) {
         recyclerView.addItemDecoration(new HorizontalDividerDecoration(getResources()));
 
-        this.adapter = new FirmwareAdapter(getActivity());
+        this.adapter = new FirmwareVersionAdapter(getActivity());
         adapter.setOnItemClickedListener(this);
         recyclerView.setAdapter(adapter);
     }
@@ -65,6 +69,7 @@ public class SelectImageFragment extends RecyclerFragment implements ArrayRecycl
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        setBusy(true);
         subscribe(firmwarePresenter.versions, this::bindVersions, this::presentError);
     }
 
@@ -75,27 +80,59 @@ public class SelectImageFragment extends RecyclerFragment implements ArrayRecycl
         firmwarePresenter.saveInstanceState(outState);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        this.adapter = null;
+    }
+
     //endregion
 
 
     //region Menu
 
     @Override
+    public CharSequence getNavigationTitle(@NonNull Context context) {
+        return context.getString(R.string.title_select_firmware);
+    }
+
+    @Override
     public CharSequence getNavigationSubtitle(@NonNull Context context) {
-        return "Select Firmware Image";
+        return context.getString(firmwarePresenter.getFilterType().titleRes);
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_select_image, menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_show_stable:
+                firmwarePresenter.setFilterType(FirmwarePresenter.FilterType.STABLE);
+                invalidateTitles();
+                return true;
+
+            case R.id.action_show_unstable:
+                firmwarePresenter.setFilterType(FirmwarePresenter.FilterType.UNSTABLE);
+                invalidateTitles();
+                return true;
+
+            case R.id.action_choose_file:
+                chooseLocalFile();
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onRefresh() {
+        firmwarePresenter.update();
+        setBusy(true);
     }
 
     //endregion
@@ -105,6 +142,9 @@ public class SelectImageFragment extends RecyclerFragment implements ArrayRecycl
 
     public void bindVersions(@NonNull ArrayList<FirmwareVersion> versions) {
         setBusy(false);
+
+        adapter.clear();
+        adapter.addAll(versions);
     }
 
     public void presentError(Throwable e) {
@@ -118,7 +158,9 @@ public class SelectImageFragment extends RecyclerFragment implements ArrayRecycl
 
     @Override
     public void onItemClicked(int position, FirmwareVersion item) {
-
+        DownloadDialogFragment downloadDialogFragment = DownloadDialogFragment.newInstance(item);
+        downloadDialogFragment.setTargetFragment(this, REQUEST_CODE_DOWNLOAD);
+        downloadDialogFragment.show(getFragmentManager(), DownloadDialogFragment.TAG);
     }
 
     //endregion
@@ -126,7 +168,7 @@ public class SelectImageFragment extends RecyclerFragment implements ArrayRecycl
 
     //region Local Images
 
-    private void selectLocal() {
+    private void chooseLocalFile() {
         Intent intent = FileUtils.createGetContentIntent();
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false);
         startActivityForResult(intent, REQUEST_CODE_IMAGE);
@@ -136,12 +178,10 @@ public class SelectImageFragment extends RecyclerFragment implements ArrayRecycl
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == REQUEST_CODE_IMAGE && resultCode == Activity.RESULT_OK) {
+        if ((requestCode == REQUEST_CODE_IMAGE || requestCode == REQUEST_CODE_DOWNLOAD)
+                && resultCode == Activity.RESULT_OK) {
             Uri imageUri = data.getData();
             pillDfuPresenter.setFirmwareImage(imageUri);
-
-            Log.d(getClass().getSimpleName(), "Picked '" + imageUri + "'");
-
             getNavigation().pushFragment(new BleIntroFragment(), Navigation.FLAGS_DEFAULT);
         }
     }

@@ -5,6 +5,8 @@ import android.support.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import com.squareup.okhttp.HttpUrl;
 import com.squareup.okhttp.OkHttpClient;
 
 import javax.inject.Singleton;
@@ -14,6 +16,8 @@ import dagger.Provides;
 import is.hello.piru.api.services.AdminService;
 import is.hello.piru.api.services.CoreService;
 import is.hello.piru.api.services.SuripuApi;
+import is.hello.piru.api.util.HttpUrlGsonAdapter;
+import is.hello.piru.api.util.SessionStore;
 import retrofit.RestAdapter;
 import retrofit.client.OkClient;
 import retrofit.converter.GsonConverter;
@@ -23,6 +27,7 @@ import retrofit.converter.GsonConverter;
 public class ApiModule {
     @Singleton @Provides Gson provideGson() {
         return new GsonBuilder()
+                .registerTypeAdapter(new TypeToken<HttpUrl>(){}.getType(), new HttpUrlGsonAdapter())
                 .disableHtmlEscaping()
                 .create();
     }
@@ -31,7 +36,8 @@ public class ApiModule {
         return new OkHttpClient();
     }
 
-    @Singleton @Provides SessionStore provideSession(@NonNull Context context) {
+    @Singleton @Provides
+    SessionStore provideSession(@NonNull Context context) {
         return new SessionStore(context);
     }
 

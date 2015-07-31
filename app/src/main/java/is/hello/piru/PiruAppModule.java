@@ -8,9 +8,10 @@ import dagger.Provides;
 import is.hello.piru.api.ApiModule;
 import is.hello.piru.bluetooth.BluetoothModule;
 import is.hello.piru.ui.MainActivity;
+import is.hello.piru.ui.dialogs.DownloadDialogFragment;
 import is.hello.piru.ui.screens.DfuCompleteFragment;
 import is.hello.piru.ui.screens.DfuProgressFragment;
-import is.hello.piru.ui.screens.SelectImageFragment;
+import is.hello.piru.ui.screens.SelectFirmwareFragment;
 import is.hello.piru.ui.screens.SelectPillFragment;
 import is.hello.piru.ui.screens.SignInFragment;
 
@@ -18,7 +19,8 @@ import is.hello.piru.ui.screens.SignInFragment;
         injects = {
                 MainActivity.class,
                 SignInFragment.class,
-                SelectImageFragment.class,
+                SelectFirmwareFragment.class,
+                DownloadDialogFragment.class,
                 SelectPillFragment.class,
                 DfuProgressFragment.class,
                 DfuCompleteFragment.class,

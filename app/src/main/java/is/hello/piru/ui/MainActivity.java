@@ -11,9 +11,9 @@ import android.support.v7.app.AppCompatActivity;
 import javax.inject.Inject;
 
 import is.hello.piru.R;
-import is.hello.piru.api.SessionStore;
+import is.hello.piru.api.util.SessionStore;
 import is.hello.piru.ui.navigation.Navigation;
-import is.hello.piru.ui.screens.SelectImageFragment;
+import is.hello.piru.ui.screens.SelectFirmwareFragment;
 import is.hello.piru.ui.screens.SignInFragment;
 
 import static is.hello.piru.PiruApplication.inject;
@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements Navigation, Fragm
 
         getSupportFragmentManager().addOnBackStackChangedListener(this);
         if (sessionStore.hasSession()) {
-            pushFragment(new SelectImageFragment(), Navigation.FLAG_MAKE_HISTORY_ROOT);
+            pushFragment(new SelectFirmwareFragment(), Navigation.FLAG_MAKE_HISTORY_ROOT);
         } else {
             pushFragment(new SignInFragment(), Navigation.FLAG_MAKE_HISTORY_ROOT);
         }

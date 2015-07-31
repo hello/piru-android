@@ -1,4 +1,4 @@
-package is.hello.piru.api;
+package is.hello.piru.api.util;
 
 import android.content.Context;
 import android.content.Intent;

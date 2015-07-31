@@ -23,7 +23,11 @@ public class ErrorDialogFragment extends DialogFragment {
         builder.setTitle(R.string.title_error);
 
         StringRef message = getArguments().getParcelable(ARG_MESSAGE);
-        builder.setMessage(message.resolve(getActivity()));
+        if (message != null) {
+            builder.setMessage(message.resolve(getActivity()));
+        } else {
+            builder.setMessage(R.string.error_message_generic);
+        }
 
         builder.setPositiveButton(android.R.string.ok, null);
 
@@ -41,7 +45,7 @@ public class ErrorDialogFragment extends DialogFragment {
             if (e != null) {
                 return withMessage(Errors.getDisplayMessage(e));
             } else {
-                return withMessage(R.string.error_message_generic);
+                return withMessage((StringRef) null);
             }
         }
 

@@ -100,6 +100,7 @@ import rx.Observable;
     }
 
     public void setFirmwareImage(@NonNull Uri firmwareImage) {
+        Log.d(getClass().getSimpleName(), "setFirmwareImage(" + firmwareImage + ")");
         this.firmwareImage = firmwareImage;
     }
 

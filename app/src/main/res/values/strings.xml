@@ -34,4 +34,8 @@
     <string name="hint_email">Email</string>
     <string name="hint_password">Password</string>
     <string name="error_missing_email_or_password">Email and password are required.</string>
+    <string name="title_downloading">Downloading…</string>
+    <string name="title_select_firmware">Select Firmware</string>
+    <string name="title_filter_type_stable">Stable Versions</string>
+    <string name="title_filter_type_unstable">Unstable Versions</string>
 </resources>

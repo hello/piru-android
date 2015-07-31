@@ -9,16 +9,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.text.DateFormat;
-import java.util.Date;
 
 import is.hello.piru.R;
 import is.hello.piru.api.model.FirmwareVersion;
 
-public class FirmwareAdapter extends ArrayRecyclerAdapter<FirmwareVersion, FirmwareAdapter.ViewHolder> {
+public class FirmwareVersionAdapter extends ArrayRecyclerAdapter<FirmwareVersion, FirmwareVersionAdapter.ViewHolder> {
     private final LayoutInflater inflater;
     private final DateFormat dateFormat = DateFormat.getDateTimeInstance();
 
-    public FirmwareAdapter(@NonNull Context context) {
+    public FirmwareVersionAdapter(@NonNull Context context) {
         this.inflater = LayoutInflater.from(context);
     }
 
@@ -31,8 +30,8 @@ public class FirmwareAdapter extends ArrayRecyclerAdapter<FirmwareVersion, Firmw
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         FirmwareVersion version = getItem(position);
-        holder.nameText.setText(version.getName());
-        holder.dateText.setText(dateFormat.format(new Date(version.getCreatedAt())));
+        holder.nameText.setText(version.getDisplayName());
+        holder.dateText.setText(dateFormat.format(version.getCreatedAt()));
     }
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

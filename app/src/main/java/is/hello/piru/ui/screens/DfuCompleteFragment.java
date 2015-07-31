@@ -43,7 +43,7 @@ public class DfuCompleteFragment extends BaseFragment {
 
     public void chooseNewImage(@NonNull View sender) {
         presenter.reset(true);
-        getNavigation().pushFragment(new SelectImageFragment(), Navigation.FLAG_MAKE_HISTORY_ROOT);
+        getNavigation().pushFragment(new SelectFirmwareFragment(), Navigation.FLAG_MAKE_HISTORY_ROOT);
     }
 
     public void exit(@NonNull View sender) {

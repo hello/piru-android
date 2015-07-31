@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import is.hello.piru.api.SessionStore;
 import is.hello.piru.api.model.FirmwareType;
 import is.hello.piru.api.model.FirmwareVersion;
 import is.hello.piru.api.model.OAuthCredentials;
+import is.hello.piru.api.util.SessionStore;
 import rx.Observable;
 
 @Singleton public final class SuripuApi {
