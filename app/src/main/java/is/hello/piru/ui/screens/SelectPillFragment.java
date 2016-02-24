@@ -11,8 +11,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import is.hello.buruberi.util.Errors;
-import is.hello.buruberi.util.StringRef;
+import is.hello.commonsense.util.Errors;
+import is.hello.commonsense.util.StringRef;
 import is.hello.piru.R;
 import is.hello.piru.bluetooth.PillDfuPresenter;
 import is.hello.piru.bluetooth.PillPeripheral;

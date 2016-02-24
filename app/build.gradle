@@ -80,6 +80,7 @@ dependencies {
     testCompile 'org.robolectric:robolectric:3.0'
     testCompile 'junit:junit:4.12'
 
-    compile 'is.hello.buruberi:core:0.0.1-SNAPSHOT'
+    compile 'is.hello:buruberi-core:1.0.1'
+    compile 'is.hello.commonsense:ble:2016.2.12.1'
     compile project(':dfu')
 }

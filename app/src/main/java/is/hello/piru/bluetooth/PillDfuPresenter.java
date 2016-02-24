@@ -19,11 +19,11 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import is.hello.buruberi.bluetooth.errors.BluetoothGattError;
-import is.hello.buruberi.bluetooth.errors.PeripheralNotFoundError;
+import is.hello.buruberi.bluetooth.errors.GattException;
 import is.hello.buruberi.bluetooth.stacks.BluetoothStack;
 import is.hello.buruberi.bluetooth.stacks.util.PeripheralCriteria;
 import is.hello.buruberi.util.Rx;
+import is.hello.piru.exception.PillNotFoundException;
 import is.hello.piru.ui.util.FileUtils;
 import is.hello.piru.ui.util.PresenterSubject;
 import rx.Observable;
@@ -114,7 +114,7 @@ import rx.Observable;
 
     public Observable<PillPeripheral> enterDfuMode() {
         if (targetPill == null) {
-            return Observable.error(new PeripheralNotFoundError());
+            return Observable.error(new PillNotFoundException());
         }
 
         Observable<PillPeripheral> connect = targetPill.connect()
@@ -141,7 +141,7 @@ import rx.Observable;
             }
 
             if (targetPill == null) {
-                subscriber.onError(new PeripheralNotFoundError());
+                subscriber.onError(new PillNotFoundException());
                 return;
             }
 
@@ -176,7 +176,7 @@ import rx.Observable;
         filter.addAction(DfuService.BROADCAST_PROGRESS);
         return Rx.fromLocalBroadcast(context, filter).flatMap(broadcast -> {
             if (DfuService.BROADCAST_ERROR.equals(broadcast.getAction())) {
-                int errorCode = broadcast.getIntExtra(DfuService.EXTRA_DATA, BluetoothGattError.GATT_STACK_ERROR);
+                int errorCode = broadcast.getIntExtra(DfuService.EXTRA_DATA, GattException.GATT_STACK_ERROR);
                 return Observable.error(new DfuService.Error(errorCode));
             } else {
                 int progress = broadcast.getIntExtra(DfuService.EXTRA_DATA, 0);
