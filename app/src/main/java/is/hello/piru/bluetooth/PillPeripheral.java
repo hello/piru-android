@@ -9,14 +9,15 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import is.hello.buruberi.bluetooth.errors.PeripheralConnectionError;
+import is.hello.buruberi.bluetooth.errors.GattException;
 import is.hello.buruberi.bluetooth.stacks.BluetoothStack;
 import is.hello.buruberi.bluetooth.stacks.GattPeripheral;
 import is.hello.buruberi.bluetooth.stacks.OperationTimeout;
-import is.hello.buruberi.bluetooth.stacks.PeripheralService;
+import is.hello.buruberi.bluetooth.stacks.GattService;
 import is.hello.buruberi.bluetooth.stacks.util.AdvertisingData;
 import is.hello.buruberi.bluetooth.stacks.util.Bytes;
 import is.hello.buruberi.bluetooth.stacks.util.PeripheralCriteria;
+import is.hello.piru.exception.PillNotFoundException;
 import rx.Observable;
 
 public final class PillPeripheral {
@@ -30,6 +31,8 @@ public final class PillPeripheral {
 
     private static final byte COMMAND_WIPE_FIRMWARE = 8;
 
+    private static final int TIME_OUT_SECONDS  = 10;
+
     //endregion
 
 
@@ -37,7 +40,7 @@ public final class PillPeripheral {
 
     private final GattPeripheral gattPeripheral;
     private final boolean inDfuMode;
-    private PeripheralService service;
+    private GattService service;
 
     //endregion
 
@@ -47,12 +50,10 @@ public final class PillPeripheral {
     public static Observable<List<PillPeripheral>> discover(@NonNull BluetoothStack bluetoothStack,
                                                             @NonNull PeripheralCriteria criteria) {
         criteria.setDuration(PeripheralCriteria.DEFAULT_DURATION_MS * 2);
-        criteria.addPredicate(ad -> {
-            return (ad.anyRecordMatches(AdvertisingData.TYPE_LIST_OF_128_BIT_SERVICE_CLASS_UUIDS,
-                            b -> Arrays.equals(NORMAL_ADVERTISEMENT_SERVICE_128_BIT, b)) ||
-                    ad.anyRecordMatches(AdvertisingData.TYPE_INCOMPLETE_LIST_OF_128_BIT_SERVICE_CLASS_UUIDS,
-                            b -> Arrays.equals(DFU_ADVERTISEMENT_SERVICE_128_BIT, b)));
-        });
+        criteria.addPredicate(ad -> (ad.anyRecordMatches(AdvertisingData.TYPE_LIST_OF_128_BIT_SERVICE_CLASS_UUIDS,
+                        b -> Arrays.equals(NORMAL_ADVERTISEMENT_SERVICE_128_BIT, b)) ||
+                ad.anyRecordMatches(AdvertisingData.TYPE_INCOMPLETE_LIST_OF_128_BIT_SERVICE_CLASS_UUIDS,
+                        b -> Arrays.equals(DFU_ADVERTISEMENT_SERVICE_128_BIT, b))));
         return bluetoothStack.discoverPeripherals(criteria)
                              .map(peripherals -> {
                                  List<PillPeripheral> pillPeripherals = new ArrayList<>();
@@ -116,7 +117,7 @@ public final class PillPeripheral {
         }
 
         OperationTimeout operationTimeout = createOperationTimeout("Connect");
-        return gattPeripheral.connect(operationTimeout)
+        return gattPeripheral.connect(GattPeripheral.CONNECT_FLAG_DEFAULTS,operationTimeout)
                          .flatMap(connectedPeripheral -> {
                              Log.d(getClass().getSimpleName(), "discoverService(" + SERVICE + ")");
                              return connectedPeripheral.discoverService(SERVICE, operationTimeout);
@@ -164,10 +165,11 @@ public final class PillPeripheral {
         Log.d(getClass().getSimpleName(), "writeCommand(" + identifier + ", " + writeType + ", " + Arrays.toString(payload) + ")");
 
         if (!isConnected()) {
-            return Observable.error(new PeripheralConnectionError("writeCommand(...) requires a connection"));
+            return Observable.error(new PillNotFoundException("writeCommand(...) requires a connection"));
         }
-
-        return gattPeripheral.writeCommand(service, identifier, writeType, payload, createOperationTimeout("Write Command"));
+        return service.getCharacteristic(identifier).write(writeType, payload, gattPeripheral.createOperationTimeout("Animation",
+                TIME_OUT_SECONDS,
+                TimeUnit.SECONDS));
     }
 
     public Observable<PillPeripheral> wipeFirmware() {
