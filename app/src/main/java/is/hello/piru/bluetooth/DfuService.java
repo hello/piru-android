@@ -40,10 +40,10 @@ public class DfuService extends DfuBaseService {
         }
     }
 
-    public static class Error extends BuruberiException {
+    public static class DfuException extends BuruberiException {
         public final int error;
 
-        public Error(int error) {
+        public DfuException(int error) {
             super(GattError.parse(error));
             this.error = error;
         }

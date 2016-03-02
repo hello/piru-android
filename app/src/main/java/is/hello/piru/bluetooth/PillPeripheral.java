@@ -31,6 +31,8 @@ public final class PillPeripheral {
 
     private static final byte COMMAND_WIPE_FIRMWARE = 8;
 
+    private static final int TIME_OUT_SECONDS  = 10;
+
     //endregion
 
 
@@ -165,7 +167,9 @@ public final class PillPeripheral {
         if (!isConnected()) {
             return Observable.error(new PillNotFoundException("writeCommand(...) requires a connection"));
         }
-        return writeCommand(identifier,writeType,payload);
+        return service.getCharacteristic(identifier).write(writeType, payload, gattPeripheral.createOperationTimeout("Animation",
+                TIME_OUT_SECONDS,
+                TimeUnit.SECONDS));
     }
 
     public Observable<PillPeripheral> wipeFirmware() {

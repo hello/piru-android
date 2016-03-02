@@ -177,7 +177,7 @@ import rx.Observable;
         return Rx.fromLocalBroadcast(context, filter).flatMap(broadcast -> {
             if (DfuService.BROADCAST_ERROR.equals(broadcast.getAction())) {
                 int errorCode = broadcast.getIntExtra(DfuService.EXTRA_DATA, GattException.GATT_STACK_ERROR);
-                return Observable.error(new DfuService.Error(errorCode));
+                return Observable.error(new DfuService.DfuException(errorCode));
             } else {
                 int progress = broadcast.getIntExtra(DfuService.EXTRA_DATA, 0);
                 return Observable.just(progress);
