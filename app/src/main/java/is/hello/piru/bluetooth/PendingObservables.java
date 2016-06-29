@@ -32,7 +32,7 @@ public final class PendingObservables<T> {
      * @param token     The token to use for tracking the Observable.
      * @param provider  The functor that will generate the Observable if needed.
      */
-    public <U> Observable<U> bind(@NonNull T token, @NonNull Func0<Observable<U>> provider) {
+    public <U> Observable<U> bind(@NonNull final T token, @NonNull Func0<Observable<U>> provider) {
         synchronized (pending) {
             //noinspection unchecked
             AsyncSubject<U> existing = (AsyncSubject<U>) pending.get(token);

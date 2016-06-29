@@ -3,7 +3,7 @@ package is.hello.piru.bluetooth;
 import android.app.Activity;
 import android.support.annotation.StringRes;
 
-import is.hello.buruberi.bluetooth.errors.BluetoothError;
+import is.hello.buruberi.bluetooth.errors.BuruberiException;
 import is.hello.piru.R;
 import is.hello.piru.ui.DfuNotificationActivity;
 import no.nordicsemi.android.dfu.DfuBaseService;
@@ -40,10 +40,10 @@ public class DfuService extends DfuBaseService {
         }
     }
 
-    public static class Error extends BluetoothError {
+    public static class DfuException extends BuruberiException {
         public final int error;
 
-        public Error(int error) {
+        public DfuException(int error) {
             super(GattError.parse(error));
             this.error = error;
         }
