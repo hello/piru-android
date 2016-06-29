@@ -4,8 +4,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import is.hello.buruberi.bluetooth.errors.BuruberiException;
-import is.hello.commonsense.util.Errors;
-import is.hello.commonsense.util.StringRef;
+import is.hello.common.util.Errors;
+import is.hello.common.util.StringRef;
 import is.hello.piru.R;
 
 public class PillNotFoundException extends BuruberiException implements Errors.Reporting{

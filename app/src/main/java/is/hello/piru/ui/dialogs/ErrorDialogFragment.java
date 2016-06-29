@@ -9,8 +9,8 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 
-import is.hello.commonsense.util.Errors;
-import is.hello.commonsense.util.StringRef;
+import is.hello.common.util.Errors;
+import is.hello.common.util.StringRef;
 import is.hello.piru.R;
 
 public class ErrorDialogFragment extends DialogFragment {

@@ -22,7 +22,7 @@ def generateVersionCode() {
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion "23.0.3"
 
     defaultConfig {
         applicationId "is.hello.piru"
@@ -58,6 +58,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_6
+    }
 }
 
 dependencies {
@@ -81,6 +86,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
 
     compile 'is.hello:buruberi-core:1.0.2'
-    compile 'is.hello.commonsense:ble:2016.2.12.1'
+    compile 'is.hello.common.util:util:2016.6.29.1'
     compile project(':dfu')
 }
